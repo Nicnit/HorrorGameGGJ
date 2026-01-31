@@ -46,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   floorPrefab: {fileID: 405572304276984119, guid: 5ff6abce4c1b15b42b75c3ea53393622, type: 3}
   wallPrefab: {fileID: 1476645145883747998, guid: e6d861a3608585447b7eb60d11a792f8, type: 3}
+  ceilingPrefab: {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
   grassPrefab: {fileID: 405572304276984119, guid: b175571101ac8bf4e8046d8d00a89928, type: 3}
   playerPrefab: {fileID: 6705697775075807597, guid: 7d1c00746275844458465bd6cdadb08a, type: 3}
   worldLightPrefab: {fileID: 8096542298612641285, guid: 4d53a4540024e5047af40158f980bc7c, type: 3}
