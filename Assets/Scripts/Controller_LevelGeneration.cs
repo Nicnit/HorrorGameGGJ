@@ -381,12 +381,4 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         return false;
     }
-    
-    
-
-    // Update is called once per frame
-    void Update() 
-    {
-        
-    }
 }
