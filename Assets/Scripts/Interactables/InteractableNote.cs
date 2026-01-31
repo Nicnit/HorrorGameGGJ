@@ -14,7 +14,10 @@ public class InteractableNote : BaseInteractable
         
         // Turn off the Notepaper if it isn't allowed to be seen
         if (!canShowNote && noteVFX.activeInHierarchy)
+        {
             noteVFX.SetActive(false);
+            Debug.Log("Cant show note");
+        }
     }
     
     
@@ -22,13 +25,18 @@ public class InteractableNote : BaseInteractable
     protected override void OnInteractionTrigger()
     {
         // update progress manager to include this note as done/read
-        FinishNote();
+        FinishInteractable();
         
         // Show Note UI
         canShowNote = !canShowNote;
+        noteVFX.SetActive(true);
         
         // Do note sound effect
-        ReadSFX();
+        // ReadSFX();
+        
+        Debug.Log("Did interaction trigger");
+        Debug.Log("Can show note: " + canShowNote);
+        Debug.Log(noteVFX.activeInHierarchy);
     }
     
     private void ReadSFX()
@@ -39,6 +47,7 @@ public class InteractableNote : BaseInteractable
 
     protected override void HideUINotice()
     {
+        Debug.Log("Hiding UI Notice");
         base.HideUINotice();
         // Hide Note so doesn't display when too far
         canShowNote = false;

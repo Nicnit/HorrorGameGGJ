@@ -5,8 +5,9 @@ using UnityEngine.InputSystem;
 public abstract class BaseInteractable : MonoBehaviour
 {
     private bool isFinished = false;
-    protected void FinishNote() => isFinished = true;
-    [SerializeField] protected GameObject noticeObject;
+    protected void FinishInteractable() => isFinished = true;
+    public bool IsFinished() => isFinished;
+    [SerializeField] protected GameObject noticePopup;
     [SerializeField] protected float interactDistance;
  
     protected GameObject player;
@@ -28,7 +29,7 @@ public abstract class BaseInteractable : MonoBehaviour
     /// </summary>
     protected virtual void Update()
     {
-        // If player close enough, popup ui
+        // If player close enough, popup notice ui
         float playerDistance = Vector3.Distance(transform.position, player.transform.position);
         if (playerDistance < interactDistance)
             ShowUINotice();
@@ -38,7 +39,7 @@ public abstract class BaseInteractable : MonoBehaviour
         // If UI showing and player uses Interact button, do interaction
         // Also if no other UI is showing
         if (isInteracting != null && isInteracting.triggered
-                && noticeObject.activeSelf) // TODO check if MAIN UI is activated via UI manager
+                && noticePopup.activeSelf) // TODO check if MAIN UI is activated via UI manager
         {
             OnInteractionTrigger();
         }
@@ -47,12 +48,12 @@ public abstract class BaseInteractable : MonoBehaviour
     
     protected virtual void ShowUINotice()
     {
-        noticeObject.SetActive(true);
+        noticePopup.SetActive(true);
     }
     
     protected virtual void HideUINotice()
     {
-        noticeObject.SetActive(false);
+        noticePopup.SetActive(false);
     }
 
 
