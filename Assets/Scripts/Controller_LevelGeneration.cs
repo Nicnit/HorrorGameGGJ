@@ -9,6 +9,8 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject grassPrefab;
+
+    [SerializeField] private GameObject playerPrefab;
     //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
 
@@ -99,6 +101,10 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         RunPaint(paintBudget);
         BuildWallsFromMap(0);
+        
+        Vector3 worldPosCenter = MapPositionToWorld(center);
+
+        Instantiate(playerPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
     }
 
     // --------------------------
