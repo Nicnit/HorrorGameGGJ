@@ -8,6 +8,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     [Header("Map Prefabs")]
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject grassPrefab;
 
     [SerializeField] private GameObject playerPrefab;
@@ -236,7 +237,7 @@ public class Controller_LevelGeneration : MonoBehaviour
         //Do a roof - currently just a floor on the ceiling
         if (useRoof)
         {
-            GameObject roof = Instantiate(floorPrefab, roofPos, Quaternion.identity);
+            GameObject roof = Instantiate(ceilingPrefab, roofPos, Quaternion.identity);
             roof.transform.SetParent(tile.transform);
             roof.transform.name = $"Roof ({position.x},{position.z})";
         }
