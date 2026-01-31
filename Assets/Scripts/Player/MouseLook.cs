@@ -9,7 +9,7 @@ public class MouseLook : MonoBehaviour
     public Rigidbody playerRb;
 
     private float pitch = 0f;
-    private float yawDelta = 0f;
+    private float yaw = 0f;
 
     private InputAction lookAction;
 
@@ -18,6 +18,8 @@ public class MouseLook : MonoBehaviour
         LockCursor(true);
         playerRb = transform.parent.GetComponent<Rigidbody>();
         lookAction = InputSystem.actions.FindAction("Look");
+
+        yaw = playerRb.rotation.eulerAngles.y;
     }
 
     // Update is called once per frame
@@ -32,13 +34,13 @@ public class MouseLook : MonoBehaviour
 
         // apply rotations
         transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-        yawDelta = targetDir.x;
+        yaw += targetDir.x;
     }
 
     private void FixedUpdate()
     {
-        playerRb.MoveRotation(playerRb.rotation * Quaternion.Euler(0f, yawDelta, 0f));
-        yawDelta = 0f;
+        Quaternion target = Quaternion.Euler(0f, yaw, 0f);
+        playerRb.MoveRotation(target);
     }
 
     void LockCursor(bool shouldLock) 
