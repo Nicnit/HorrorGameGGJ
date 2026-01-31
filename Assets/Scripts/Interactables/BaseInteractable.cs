@@ -4,6 +4,8 @@ using UnityEngine.InputSystem;
 
 public abstract class BaseInteractable : MonoBehaviour
 {
+    private bool isFinished = false;
+    protected void FinishNote() => isFinished = true;
     [SerializeField] protected GameObject noticeObject;
     [SerializeField] protected float interactDistance;
  

@@ -2,14 +2,19 @@ using UnityEngine;
 
 public class TripwireTrap : BaseTrap
 {
+    [SerializeField] protected float stunDuration;
+    
     protected virtual void DoTrapEffect()
     {
         // Stun the player
-        // TODO invoke Player's Stun() function or similar
+        playerController.StunLock(stunDuration);
+        
+        //Stunlock VFX
+        // TODO tripwire trap VFX
+        // TODO tripwire trap SFX
         
         // Aggro the monster
         // TODO requires monster
         
-        throw new System.NotImplementedException();
     }
 }

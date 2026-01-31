@@ -8,7 +8,7 @@ public class InteractableNote : BaseInteractable
     private bool canShowNote = false;
     [SerializeField] private GameObject noteVFX;
 
-    protected virtual void Update()
+    protected override void Update()
     {
         base.Update();
         
@@ -21,7 +21,8 @@ public class InteractableNote : BaseInteractable
     
     protected override void OnInteractionTrigger()
     {
-        // TODO update progress manager to include this note as done/read
+        // update progress manager to include this note as done/read
+        FinishNote();
         
         // Show Note UI
         canShowNote = !canShowNote;
