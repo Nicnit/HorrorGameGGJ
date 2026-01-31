@@ -5,7 +5,8 @@ public class MainMenu : MonoBehaviour
 {
     public void PlayGame()
     {
-        SceneManager.LoadScene("New Master Scene");
+        SceneManager.LoadScene("GameTest");
+        Time.timeScale = 1f;
     }
 
     public void ExitGame()
@@ -15,5 +16,9 @@ public class MainMenu : MonoBehaviour
 #else
                 Application.Quit();
 #endif
+    }
+
+    public void PlayButtonPress() {
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.ButtonPressed);
     }
 }

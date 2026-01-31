@@ -57,10 +57,10 @@ public class AudioManager : MonoBehaviour
     {
         switch (scene.name)
         {
-            case "Main Menu":
+            case "MainMenu":
                 Instance.ChangeBackground(E_BackGroundMusic.MainMenu);
                 break;
-            case "Game":
+            case "GameTest":
                 Instance.ChangeBackground(E_BackGroundMusic.Game);
                 break;
         }
@@ -69,8 +69,7 @@ public class AudioManager : MonoBehaviour
     public void ChangeBackground(E_BackGroundMusic background)
     {
 
-        if (BackgroundMusic.isPlaying)
-            BackgroundMusic.Stop();
+        BackgroundMusic.Stop();
 
         switch (background)
         {

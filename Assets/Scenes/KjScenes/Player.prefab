@@ -263,11 +263,12 @@ MonoBehaviour:
   walkSpeed: 5
   jumpForce: 5
   sprintSpeed: 5
+  canMove: 1
   groundCheck: {fileID: 3186025411838639559}
   groundDistance: 0.2
   groundMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 0
 --- !u!136 &3874662942888267306
 CapsuleCollider:
   m_ObjectHideFlags: 0
