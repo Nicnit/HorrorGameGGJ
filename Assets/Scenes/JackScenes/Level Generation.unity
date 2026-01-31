@@ -279,7 +279,9 @@ MonoBehaviour:
   wallPrefab: {fileID: 1476645145883747998, guid: e6d861a3608585447b7eb60d11a792f8, type: 3}
   grassPrefab: {fileID: 405572304276984119, guid: b175571101ac8bf4e8046d8d00a89928, type: 3}
   wallVariants:
+  - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
   - {fileID: 1476645145883747998, guid: d2bdd1b8f53a29641b4bd1dd5685e114, type: 3}
+  - {fileID: 1476645145883747998, guid: c19d2f87492fda940af58e6c35415de6, type: 3}
   tileSize: 5
   mapWidth: 100
   mapHeight: 100
@@ -399,7 +401,7 @@ Transform:
   m_GameObject: {fileID: 2111611101}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 251.3, y: 2.2, z: 247.58}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
