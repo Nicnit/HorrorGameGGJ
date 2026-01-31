@@ -41,8 +41,7 @@ public class PlayerController : MonoBehaviour
     {
         
         // Handle player being stunned (Critical nonmovement logics should be before this)
-        bool stunned = stunTime < maxStunTime;
-        if (stunned)
+        if (stunTime < maxStunTime)
         {
             // Can't move, jump, etc.
             stunTime += Time.deltaTime;
@@ -108,7 +107,7 @@ public class PlayerController : MonoBehaviour
             }
         }
         rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
-        Debug.Log(stamina + ", " + isSprinting);
+        // Debug.Log(stamina + ", " + isSprinting);
     }
 
     void UpdateGround()
@@ -120,6 +119,8 @@ public class PlayerController : MonoBehaviour
     private float stunTime = 3f;
     public void StunLock(float newStunTime)
     {
+        Debug.Log("Stunned");
+        
         float stunTimeLeft = maxStunTime - stunTime;
         // Keep higher stuntime
         if (stunTimeLeft < newStunTime)

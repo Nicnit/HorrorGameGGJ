@@ -31,10 +31,12 @@ public class MaskManager : MonoBehaviour
     private InputAction toggleMaskAction;
     private bool maskOn;
     private bool changingMaskState = false;
+    private bool isPuttingOn = false; // Track direction to decouple from maskOn state
     
     private void Start()
     {
-        toggleMaskAction = InputSystem.actions.FindAction("Jump"); // ToggleMask
+        toggleMaskAction = InputSystem.actions.FindAction("ToggleMask"); // ToggleMask
+        toggleMaskAction.Enable();
         maskVFX.SetActive(false);
         maskMoveVFX.SetActive(false);
     }
@@ -46,7 +48,7 @@ public class MaskManager : MonoBehaviour
         
         if (changingMaskState) // Update timers
         {
-            if (maskOn)
+            if (!isPuttingOn)
                 TakeOffMask();
             else
                 PutOnMask();
@@ -65,14 +67,18 @@ public class MaskManager : MonoBehaviour
             curTimer = 0f;
             changingMaskState = true;
             maskMoveVFX.SetActive(true);
+            isPuttingOn = true;
             // TODO put on mask animation here
             PutOnMask();
         }
         else
         {
+            SetMaskOff(); 
+            
             curTimer = 0f;
-            maskMoveVFX.SetActive(true);
+            maskMoveVFX.SetActive(true); // Re-enable because SetMaskOff disabled it
             changingMaskState = true;
+            isPuttingOn = false;
             // TODO take off mask animation here
             TakeOffMask();
         }
@@ -83,13 +89,7 @@ public class MaskManager : MonoBehaviour
 
     public void PutOnMask()
     {
-        if (maskOn)
-        {
-            changingMaskState = false;
-            return;
-        }
-        
-        // Handle Timer until Animation finishes
+        // Handle timer until anim finishes
         if (curTimer < maskPutOnTimer)
         {
             curTimer += Time.deltaTime;
@@ -102,13 +102,7 @@ public class MaskManager : MonoBehaviour
 
     public void TakeOffMask()
     {
-        if (!maskOn)
-        {
-            changingMaskState = false;
-            return;
-        }
-        
-        // Handle Timer until Animation finishes
+        // Handle timer until anim finishes
         if (curTimer < maskTakeOffTimer)
         {
             curTimer += Time.deltaTime;
@@ -116,7 +110,7 @@ public class MaskManager : MonoBehaviour
         }
         
         changingMaskState = false;
-        SetMaskOff();
+        maskMoveVFX.SetActive(false);
     }
 
     private void SetMaskOn()

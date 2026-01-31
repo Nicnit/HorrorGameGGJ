@@ -5,12 +5,13 @@ using UnityEngine.InputSystem;
 
 public abstract class BaseTrap : MonoBehaviour
 {
-    protected GameObject player;
+    [SerializeField] protected GameObject player;
     protected PlayerController playerController;
 
     protected virtual void Start()
     {
-        player = GameObject.FindWithTag("Player");
+        if (player == null)
+            player = GameObject.FindGameObjectWithTag("Player");
         playerController = player.GetComponent<PlayerController>();
     }
 
@@ -27,7 +28,10 @@ public abstract class BaseTrap : MonoBehaviour
         // Default Behavior here
     }
     
+    // If mask set on, show traps
+    // If mask set off, hide traps
     
+    private 
     
     
 }
