@@ -4,8 +4,9 @@ public class TripwireTrap : BaseTrap
 {
     [SerializeField] protected float stunDuration;
     
-    protected virtual void DoTrapEffect()
+    protected override void DoTrapEffect()
     {
+        base.DoTrapEffect();
         // Stun the player
         playerController.StunLock(stunDuration);
         
