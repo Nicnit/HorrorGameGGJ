@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public float walkSpeed = 5f;
-    public float jumpForce = 5f;
-    public float sprintSpeed = 10f;
+    public float jumpForce = 4f;
+    public float sprintSpeed = 8f;
     public bool canMove = true;
 
     [Header("Ground")]

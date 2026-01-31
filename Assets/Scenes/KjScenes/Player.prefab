@@ -261,14 +261,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   walkSpeed: 5
-  jumpForce: 5
-  sprintSpeed: 5
+  jumpForce: 4
+  sprintSpeed: 8
   canMove: 1
   groundCheck: {fileID: 3186025411838639559}
   groundDistance: 0.2
   groundMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 8
+  degenRate: 3
+  regenRate: 0.5
 --- !u!136 &3874662942888267306
 CapsuleCollider:
   m_ObjectHideFlags: 0
