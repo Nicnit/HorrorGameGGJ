@@ -11,6 +11,8 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject grassPrefab;
 
     [SerializeField] private GameObject playerPrefab;
+
+    [SerializeField] private GameObject worldLightPrefab;
     //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
 
@@ -105,6 +107,7 @@ public class Controller_LevelGeneration : MonoBehaviour
         Vector3 worldPosCenter = MapPositionToWorld(center);
 
         Instantiate(playerPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
+        Instantiate(worldLightPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
     }
 
     // --------------------------
