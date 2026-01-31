@@ -246,7 +246,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &1355858512
+--- !u!1 &1799630975
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -254,8 +254,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1355858514}
-  - component: {fileID: 1355858513}
+  - component: {fileID: 1799630977}
+  - component: {fileID: 1799630976}
   m_Layer: 0
   m_Name: Level Generator
   m_TagString: Untagged
@@ -263,13 +263,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1355858513
+--- !u!114 &1799630976
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1355858512}
+  m_GameObject: {fileID: 1799630975}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 83a330620e193eb43894c034e7f23eae, type: 3}
@@ -297,13 +297,13 @@ MonoBehaviour:
   roomPlacementAttempts: 200
   variantWallChance: 0.15
   verboseLogs: 0
---- !u!4 &1355858514
+--- !u!4 &1799630977
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1355858512}
+  m_GameObject: {fileID: 1799630975}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 38.23204, y: -14.72762, z: 14.8094}
@@ -455,4 +455,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 2111611104}
   - {fileID: 203372496}
-  - {fileID: 1355858514}
+  - {fileID: 1799630977}
