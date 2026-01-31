@@ -691,5 +691,32 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
     wall.transform.name = $"Wall_{edgeDir}_({floorCell.x},{floorCell.z})";
 }
 
+    public bool IsWalkableCell(Vector3Int cell)
+    {
+        if (!InBounds(cell)) return false;
+        var e = MapData[cell.x, cell.y, cell.z].Element;
+        return e == MapElement.Hall || e == MapElement.Room;
+    }
+
+    public Vector3 CellCenterWorld(Vector3Int cell) => MapPositionToWorld(cell);
+
+    public Vector3Int WorldToCell(Vector3 worldPos)
+    {
+        // Assumes your tiles are aligned at multiples of tileSize and centered on MapPositionToWorld
+        int x = Mathf.RoundToInt(worldPos.x / tileSize);
+        int y = 0;
+        int z = Mathf.RoundToInt(worldPos.z / tileSize);
+        return new Vector3Int(x, y, z);
+    }
+
+    public IEnumerable<Vector3Int> GetNeighbors4(Vector3Int c)
+    {
+        yield return c + new Vector3Int(0, 0, 1);
+        yield return c + new Vector3Int(1, 0, 0);
+        yield return c + new Vector3Int(0, 0, -1);
+        yield return c + new Vector3Int(-1, 0, 0);
+    }
+
+
 
 }

@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2604110345439740648}
   - component: {fileID: 7871672489350330240}
   - component: {fileID: 3553737641968716254}
-  - component: {fileID: 4199257497074987223}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -155,18 +154,6 @@ MonoBehaviour:
   maxPitch: 90
   sensitivity: 0.085
   playerBody: {fileID: 5023166463494329508}
---- !u!114 &4199257497074987223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1767693954449639212}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8223e8876668c0b47ba85fdf203894d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
 --- !u!1 &4423664721788431410
 GameObject:
   m_ObjectHideFlags: 0
@@ -192,7 +179,7 @@ Transform:
   m_GameObject: {fileID: 4423664721788431410}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.14313, y: -0.88655, z: -0.05753}
+  m_LocalPosition: {x: -0.14313, y: -0.11, z: -0.05753}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -306,17 +293,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   walkSpeed: 5
-  jumpForce: 4
   sprintSpeed: 8
+  jumpForce: 4
   canMove: 1
-  neck: {fileID: 7164636785525509726}
   groundCheck: {fileID: 3186025411838639559}
   groundDistance: 0.2
   groundMask:
     serializedVersion: 2
     m_Bits: 8
+  maxStamina: 5
   degenRate: 3
   regenRate: 0.5
+  wallNormalYThreshold: 0.2
+  wallDepenetrationBias: 0
 --- !u!136 &3874662942888267306
 CapsuleCollider:
   m_ObjectHideFlags: 0

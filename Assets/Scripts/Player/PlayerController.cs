@@ -1,131 +1,202 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    public float walkSpeed = 5f;
-    public float jumpForce = 4f;
-    public float sprintSpeed = 8f;
-    public bool canMove = true;
+    [Header("Movement")]
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float sprintSpeed = 8f;
+    [SerializeField] private float jumpForce = 4f;
+    [SerializeField] public bool canMove = true;
 
     [Header("Ground")]
-    [SerializeField] Transform groundCheck;
-    [SerializeField] float groundDistance = 0.2f;
-    [SerializeField] LayerMask groundMask;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundDistance = 0.2f;
+    [SerializeField] private LayerMask groundMask;
+
+    [Header("Stamina")]
+    [SerializeField] private float maxStamina = 5f;
+    [SerializeField] private float degenRate = 3f;
+    [SerializeField] private float regenRate = 0.5f;
+
+    [Header("Wall Slide")]
+    [SerializeField, Tooltip("How 'wall-like' a surface must be. Lower = more likely to count as wall.")]
+    private float wallNormalYThreshold = 0.2f;
+
+    [SerializeField, Tooltip("Small outward nudge to reduce sticky wall contact. 0 disables.")]
+    private float wallDepenetrationBias = 0.0f;
+
+    private Rigidbody rb;
+
+    private InputAction moveAction;
+    private InputAction jumpAction;
+    private InputAction sprintAction;
 
     private bool isGrounded;
     private Vector2 inputDir;
     private bool shouldJump;
 
     private bool isSprinting;
-    private float stamina = 0f;
-    private float maxStamina = 5f;
-    [SerializeField] float degenRate = 3f;
-    [SerializeField] float regenRate = 0.5f;
+    private float stamina;
+    
+    private bool hasWallContact;
+    private Vector3 bestWallNormal; 
+    private float bestWallOpposition; 
 
-    private Rigidbody rb;
-    private InputAction moveAction;
-    private InputAction jumpAction;
-    private InputAction sprintAction;
+    private float maxStunTime = 3f;
+    private float stunTime = 3f;
 
-    void Start()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate; 
+
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
         sprintAction = InputSystem.actions.FindAction("Sprint");
+
+        stamina = maxStamina;
     }
 
     private void Update()
     {
-        
-        // Handle player being stunned (Critical nonmovement logics should be before this)
         bool stunned = stunTime < maxStunTime;
         if (stunned)
         {
-            // Can't move, jump, etc.
             stunTime += Time.deltaTime;
             return;
         }
 
-
         inputDir = moveAction.ReadValue<Vector2>();
-
         UpdateGround();
 
         if (jumpAction.WasPerformedThisFrame() && isGrounded)
-        {
             shouldJump = true;
-        }
-        else if (sprintAction.WasPressedThisFrame())
-        {
-            isSprinting = true;
-        }
-        else if (sprintAction.WasReleasedThisFrame())
-        {
-            isSprinting = false;
-        }
+
+        // held sprint
+        isSprinting = sprintAction.IsPressed();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        // movement in physics call
+        hasWallContact = false;
+        bestWallNormal = Vector3.zero;
+        bestWallOpposition = 0f;
+
         Move();
         Jump();
     }
 
-    void Jump() 
+    private void Move()
     {
-        if (shouldJump)
-        {
-            shouldJump = false;
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            Debug.Log("Jumping" + rb.linearVelocity.y);
-        }
-    }
+        if (!canMove) return;
+        if (!isGrounded) return;
 
-    void Move()
-    {
-        if (!canMove || !isGrounded) return;
-        
-        Vector3 moveDir = transform.right * inputDir.x + transform.forward * inputDir.y;
-        Vector3 velocity;
-        if (isSprinting)
+        Vector3 wishDir = (transform.right * inputDir.x + transform.forward * inputDir.y);
+
+        float inputMagnitude = Mathf.Clamp01(wishDir.magnitude);
+        if (wishDir.sqrMagnitude > 1f) wishDir.Normalize();
+        else if (wishDir.sqrMagnitude > 0f) wishDir.Normalize();
+
+        float targetSpeed = walkSpeed;
+
+        if (isSprinting && stamina > 0f && inputMagnitude > 0.01f)
         {
-            velocity = moveDir * sprintSpeed;
+            targetSpeed = sprintSpeed;
             stamina = Mathf.Max(0f, stamina - Time.fixedDeltaTime * degenRate);
-            if (stamina <= 0f)
+        }
+        else
+        {
+            stamina = Mathf.Clamp(stamina + regenRate * Time.fixedDeltaTime, 0f, maxStamina);
+        }
+
+        Vector3 desiredVelocity = wishDir * (targetSpeed * inputMagnitude);
+        
+        if (hasWallContact && desiredVelocity.sqrMagnitude > 0.0001f)
+        {
+            float intoWall = Vector3.Dot(desiredVelocity, bestWallNormal);
+
+            if (intoWall < 0f)
             {
-                isSprinting = false;
-            }
-        } else 
-        { 
-            velocity = moveDir * walkSpeed;
-            if (stamina < maxStamina)
-            {
-                stamina = Mathf.Clamp(stamina + regenRate * Time.fixedDeltaTime, 0f, maxStamina);
+                desiredVelocity = desiredVelocity - bestWallNormal * intoWall;
+                
+                if (wallDepenetrationBias > 0f)
+                    desiredVelocity += bestWallNormal * wallDepenetrationBias;
             }
         }
-        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
-        Debug.Log(stamina + ", " + isSprinting);
+
+        rb.linearVelocity = new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z);
     }
 
-    void UpdateGround()
+    private void Jump()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask, QueryTriggerInteraction.Ignore);
+        if (!shouldJump) return;
+
+        shouldJump = false;
+        
+        Vector3 v = rb.linearVelocity;
+        if (v.y < 0f) v.y = 0f;
+        rb.linearVelocity = v;
+
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
-    private float maxStunTime = 3f;
-    private float stunTime = 3f;
+    private void UpdateGround()
+    {
+        isGrounded = Physics.CheckSphere(
+            groundCheck.position,
+            groundDistance,
+            groundMask,
+            QueryTriggerInteraction.Ignore
+        );
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        Vector3 intendedMove = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (intendedMove.sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        intendedMove.Normalize();
+
+        foreach (var contact in collision.contacts)
+        {
+            Vector3 n = contact.normal;
+            
+            if (Mathf.Abs(n.y) >= wallNormalYThreshold)
+                continue;
+            
+            float opposition = -Vector3.Dot(intendedMove, n);
+
+            if (opposition > bestWallOpposition)
+            {
+                bestWallOpposition = opposition;
+                bestWallNormal = n;
+                hasWallContact = true;
+            }
+        }
+    }
+
     public void StunLock(float newStunTime)
     {
         float stunTimeLeft = maxStunTime - stunTime;
-        // Keep higher stuntime
         if (stunTimeLeft < newStunTime)
         {
             maxStunTime = newStunTime;
-            stunTime = 0;
+            stunTime = 0f;
         }
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null) return;
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+    }
+#endif
 }
