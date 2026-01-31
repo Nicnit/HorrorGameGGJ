@@ -1,5 +1,8 @@
+using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public enum E_BackGroundMusic
@@ -9,7 +12,7 @@ public enum E_BackGroundMusic
 }
 public enum E_SoundEffect
 {
-    Example,
+    ButtonPressed,
 }
 
 public class AudioManager : MonoBehaviour
@@ -21,7 +24,7 @@ public class AudioManager : MonoBehaviour
     public AudioSource SoundEffect;
 
     [Header("Sound Effect Reference")]
-    public AudioSource Example;
+    public AudioSource ButtonPressed;
 
     [Header("Background Reference")]
     public AudioSource MainMenu;
@@ -87,8 +90,18 @@ public class AudioManager : MonoBehaviour
 
         switch (soundEffect)
         {
-            case E_SoundEffect.Example:
-                Example.Play();
+            case E_SoundEffect.ButtonPressed:
+                ButtonPressed.Play();
+                break;
+        }
+    }
+    public void PlaySoundEffect(string soundEffect)
+    {
+
+        switch ((E_SoundEffect)Enum.Parse(typeof(E_SoundEffect), soundEffect))
+        {
+            case E_SoundEffect.ButtonPressed:
+                ButtonPressed.Play();
                 break;
         }
     }
@@ -98,8 +111,8 @@ public class AudioManager : MonoBehaviour
 
         switch (soundEffect)
         {
-            case E_SoundEffect.Example:
-                Example.Stop();
+            case E_SoundEffect.ButtonPressed:
+                ButtonPressed.Stop();
                 break;
         }
     }

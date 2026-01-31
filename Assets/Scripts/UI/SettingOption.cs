@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class SettingOption : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
+        Debug.Log("test");
         AudioManager.Instance.masterVolume = volume;
         AudioControl.SetFloat("Master", volume);
         if (MasterSlider.value == -30)
