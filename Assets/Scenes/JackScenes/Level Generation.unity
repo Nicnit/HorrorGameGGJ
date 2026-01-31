@@ -277,11 +277,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   floorPrefab: {fileID: 405572304276984119, guid: 5ff6abce4c1b15b42b75c3ea53393622, type: 3}
   wallPrefab: {fileID: 1476645145883747998, guid: e6d861a3608585447b7eb60d11a792f8, type: 3}
+  grassPrefab: {fileID: 405572304276984119, guid: b175571101ac8bf4e8046d8d00a89928, type: 3}
+  wallVariants:
+  - {fileID: 1476645145883747998, guid: d2bdd1b8f53a29641b4bd1dd5685e114, type: 3}
   tileSize: 5
   mapWidth: 100
   mapHeight: 100
   mapDepth: 3
-  wallHorizontalOffset: 2.25
   wallVerticalOffset: 1.5
   directionalStickiness: 0.6
   paintBudget: 300
@@ -293,6 +295,7 @@ MonoBehaviour:
   roomWidthRange: {x: 3, y: 7}
   roomHeightRange: {x: 3, y: 7}
   roomPlacementAttempts: 200
+  variantWallChance: 0.15
   verboseLogs: 0
 --- !u!4 &1355858514
 Transform:

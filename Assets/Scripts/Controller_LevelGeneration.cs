@@ -8,6 +8,9 @@ public class Controller_LevelGeneration : MonoBehaviour
     [Header("Map Prefabs")]
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject grassPrefab;
+    //Variation Pieces
+    [SerializeField] private GameObject[] wallVariants;
 
     [Header("Grid Settings")]
     [SerializeField] private int tileSize = 5;
@@ -36,6 +39,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private Vector2Int roomWidthRange = new Vector2Int(3, 7);
     [SerializeField] private Vector2Int roomHeightRange = new Vector2Int(3, 7);
     [SerializeField] private int roomPlacementAttempts = 200;
+    [SerializeField] private float variantWallChance = 0.3f;
 
     [Header("Debug")]
     [SerializeField] private bool verboseLogs = false;
@@ -197,14 +201,19 @@ public class Controller_LevelGeneration : MonoBehaviour
     // --------------------------
     // Tile Placement
     // --------------------------
-    private void InstantiateTile(Vector3Int position, MapElement element)
+    private void InstantiateTile(Vector3Int position, MapElement element, bool useRoof = true)
     {
         if (!InBounds(position)) return;
         if (MapData[position.x, position.y, position.z].Element != MapElement.Empty) return;
 
-        Vector3 worldPos = MapPositionToWorld(position);
-        GameObject tile = Instantiate(floorPrefab, worldPos, Quaternion.identity);
+        GameObject prefab = floorPrefab;
 
+        if (element == MapElement.Empty)
+            prefab = grassPrefab;
+        
+        Vector3 worldPos = MapPositionToWorld(position);
+        GameObject tile = Instantiate(prefab, worldPos, Quaternion.identity);
+        
         MapData[position.x, position.y, position.z].Element = element;
 
         if (element == MapElement.Hall) _hallCells.Add(position);
@@ -212,6 +221,18 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         tile.transform.parent = _mapParent.transform;
         tile.transform.name = $"{element} ({position.x},{position.z})";
+
+        Vector3 roofPos = new Vector3(worldPos.x, worldPos.y + wallVerticalOffset * 2, worldPos.z);
+        
+        //Do a roof - currently just a floor on the ceiling
+        if (useRoof)
+        {
+            GameObject roof = Instantiate(floorPrefab, roofPos, Quaternion.identity);
+            roof.transform.SetParent(tile.transform);
+            roof.transform.name = $"Roof ({position.x},{position.z})";
+        }
+
+
     }
 
     private void StampRect(int y, int x0, int x1, int z0, int z1, MapElement element)
@@ -546,7 +567,11 @@ private void BuildWallsFromMap(int y)
         if (!InBounds(p)) continue;
 
         MapElement here = MapData[x, y, z].Element;
-        if (!IsFloorLike(here)) continue;
+        if (!IsFloorLike(here))
+        {
+            InstantiateTile(p, MapElement.Empty, false);
+            continue;
+        }
 
         // North edge
         TryPlaceWallOnEdge(p, Direction.North);
@@ -609,6 +634,15 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
 
     if (wallPrefab == null) return;
 
+    GameObject prefab = wallPrefab;
+
+    bool variantWall = _rng.NextDouble() < variantWallChance;
+
+    if (variantWall && wallVariants.Length > 0)
+    {
+        prefab = wallVariants[_rng.Next(wallVariants.Length)];
+    }
+    
     Vector3 spawnPos = floorCenter;
     Quaternion rot = Quaternion.identity;
 
@@ -642,7 +676,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
             return;
     }
 
-    GameObject wall = Instantiate(wallPrefab, spawnPos, rot);
+    GameObject wall = Instantiate(prefab, spawnPos, rot);
     wall.transform.parent = _wallsParent.transform;
     wall.transform.name = $"Wall_{edgeDir}_({floorCell.x},{floorCell.z})";
 }
