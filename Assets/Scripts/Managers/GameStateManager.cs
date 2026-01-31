@@ -16,7 +16,7 @@ public class GameStateManager : MonoBehaviour
     private void Update()
     {
         // If notes are found
-        // TODO Increase intensity with more notes found?
+        // Increase intensity with more notes found?
 
         int numFinished = 0;
         foreach (BaseInteractable interactable in objectiveInteractables)
@@ -31,6 +31,7 @@ public class GameStateManager : MonoBehaviour
 
     private void ReachEndState()
     {
+        // End game area
         throw new System.NotImplementedException();
     }
 }
