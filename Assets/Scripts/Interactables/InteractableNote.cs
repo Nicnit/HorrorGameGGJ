@@ -27,7 +27,9 @@ public class InteractableNote : BaseInteractable
         // update progress manager to include this note as done/read
         FinishInteractable();
 
-        if (isMonster == false) {
+        if (isMonster == false)
+        {
+
             NoteUI note = FindFirstObjectByType<NoteUI>();
 
             // Show Note UI
@@ -36,12 +38,8 @@ public class InteractableNote : BaseInteractable
             // Do note sound effect
             AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Note);
 
+            GameStateManager.Instance.numFoundNotes++;
             this.gameObject.SetActive(false);
         }
-
-        // Do note sound effect
-        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Note);
-        GameStateManager.Instance.completeNotes++;
-        this.gameObject.SetActive(false);
     }
 }
