@@ -219,6 +219,14 @@ public class PlayerController : MonoBehaviour
         return isSprinting;
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Monster"))
+        {
+            FindFirstObjectByType<Death>().PlayDeath();
+        }
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
