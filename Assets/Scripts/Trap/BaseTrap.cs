@@ -9,8 +9,6 @@ public abstract class BaseTrap : MonoBehaviour
     [SerializeField] protected GameObject player;
     protected PlayerController playerController;
     [SerializeField] protected MaskManager maskManager;
-    [SerializeField] protected AudioManager audioManager;
-    [SerializeField] protected AudioClip sfxTrap;
 
     protected virtual void Start()
     {
@@ -38,6 +36,8 @@ public abstract class BaseTrap : MonoBehaviour
 
     protected virtual void DoTrapEffect()
     {
+        // TODO (if doing one SFX for all traps) traps SFX + monster scream SFX
         
+        // TODO Aggro monster 
     }
 }
