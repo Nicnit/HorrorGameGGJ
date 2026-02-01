@@ -90,6 +90,7 @@ public class MaskManager : MonoBehaviour
             changingMaskState = true;
             isPuttingOn = true;      
             gameui.MaskOn();
+            // TODO audio mask on effect
             PutOnMask();
         }
         else
@@ -100,6 +101,7 @@ public class MaskManager : MonoBehaviour
             changingMaskState = true;
             isPuttingOn = false;
             gameui.MaskOff();
+            // TODO audio mask off effect
             TakeOffMask();
         }
     }
