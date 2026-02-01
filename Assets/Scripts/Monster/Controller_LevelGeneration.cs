@@ -17,6 +17,12 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject worldLightPrefab;
     //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
+    [SerializeField] private GameObject[] ceilingVariants;
+    
+    [Header("Doors")]
+    [SerializeField] private GameObject[] doorPrefabs;
+    [SerializeField] private float doorChance = 1.0f;
+
     
     [Header("Enemy Spawning")]
     [SerializeField] private GameObject enemyPrefab;
@@ -52,6 +58,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private Vector2Int roomHeightRange = new Vector2Int(3, 7);
     [SerializeField] private int roomPlacementAttempts = 200;
     [SerializeField] private float variantWallChance = 0.3f;
+    
 
     [Header("Debug")]
     [SerializeField] private bool verboseLogs = false;
@@ -95,6 +102,9 @@ public class Controller_LevelGeneration : MonoBehaviour
 
     private GameObject _mapParent;
     private readonly Random _rng = new Random();
+    private int _lightCounter = 0;
+    private GameObject _doorsParent;
+    private readonly HashSet<string> _spawnedDoorEdges = new HashSet<string>();
 
     // --------------------------
     // Unity Entry
@@ -250,7 +260,12 @@ public class Controller_LevelGeneration : MonoBehaviour
         if (useRoof && element != MapElement.Grass)
         {
             Vector3 roofPos = new Vector3(worldPos.x, worldPos.y + wallVerticalOffset * 2, worldPos.z);
-            GameObject roof = Instantiate(ceilingPrefab, roofPos, Quaternion.identity);
+            GameObject ceiling = ceilingPrefab;
+            if(_lightCounter++ % 5 == 0 && ceilingVariants.Length > 0)
+            {
+                ceiling = ceilingVariants[_rng.Next(ceilingVariants.Length)];
+            }
+            GameObject roof = Instantiate(ceiling, roofPos, Quaternion.identity);
             roof.transform.SetParent(tile.transform);
             roof.transform.name = $"Roof ({position.x},{position.z})";
         }
@@ -582,6 +597,12 @@ private void BuildWallsFromMap(int y)
 {
     if (_wallsParent == null)
         _wallsParent = new GameObject("Walls Container");
+    
+    if (_doorsParent == null)
+        _doorsParent = new GameObject("Doors Container");
+    
+    _spawnedDoorEdges.Clear();
+
 
     _spawnedWallEdges.Clear();
 
@@ -628,19 +649,90 @@ private void BuildWallsFromMap(int y)
         }
    
 
-        // North edge
+        TryPlaceDoorOnBoundary(p, Direction.North, y);
+        TryPlaceDoorOnBoundary(p, Direction.South, y);
+        TryPlaceDoorOnBoundary(p, Direction.East,  y);
+        TryPlaceDoorOnBoundary(p, Direction.West,  y);
+
         TryPlaceWallOnEdge(p, Direction.North);
-
-        // South edge
         TryPlaceWallOnEdge(p, Direction.South);
-
-        // East edge
         TryPlaceWallOnEdge(p, Direction.East);
-
-        // West edge
         TryPlaceWallOnEdge(p, Direction.West);
+
     }
 }
+
+private bool IsHall(MapElement e) => e == MapElement.Hall;
+
+private bool IsRoomLike(MapElement e) =>
+    e == MapElement.Room || e == MapElement.RoomWithObject;
+
+private void TryPlaceDoorOnBoundary(Vector3Int floorCell, Direction edgeDir, int y)
+{
+    if (doorPrefabs == null || doorPrefabs.Length == 0) return;
+    if (_rng.NextDouble() > doorChance) return;
+
+    Vector3Int neighbor = floorCell + DirectionToOffset(edgeDir);
+    if (!InBounds(neighbor)) return;
+
+    MapElement a = MapData[floorCell.x, y, floorCell.z].Element;
+    MapElement b = MapData[neighbor.x, y, neighbor.z].Element;
+
+    bool boundary = (IsHall(a) && IsRoomLike(b)) || (IsRoomLike(a) && IsHall(b));
+    if (!boundary) return;
+
+    string edgeKey = MakeEdgeKey(floorCell, neighbor);
+    if (_spawnedDoorEdges.Contains(edgeKey)) return;
+
+    _spawnedDoorEdges.Add(edgeKey);
+    SpawnDoorForEdge(floorCell, edgeDir);
+}
+
+private void SpawnDoorForEdge(Vector3Int floorCell, Direction edgeDir)
+{
+    if (_doorsParent == null)
+        _doorsParent = new GameObject("Doors Container");
+
+    GameObject prefab = doorPrefabs[_rng.Next(doorPrefabs.Length)];
+    if (prefab == null) return;
+
+    Vector3 floorCenter = MapPositionToWorld(floorCell);
+    float half = tileSize * 0.5f;
+
+    Vector3 spawnPos = floorCenter;
+    Quaternion rot = Quaternion.identity;
+
+    switch (edgeDir)
+    {
+        case Direction.North:
+            spawnPos += new Vector3(0f, wallVerticalOffset,  half);
+            rot = Quaternion.Euler(0f, 90f, 0f);
+            break;
+
+        case Direction.South:
+            spawnPos += new Vector3(0f, wallVerticalOffset, -half);
+            rot = Quaternion.Euler(0f, 90f, 0f);
+            break;
+
+        case Direction.East:
+            spawnPos += new Vector3( half, wallVerticalOffset, 0f);
+            rot = Quaternion.Euler(0f, 0f, 0f);
+            break;
+
+        case Direction.West:
+            spawnPos += new Vector3(-half, wallVerticalOffset, 0f);
+            rot = Quaternion.Euler(0f, 0f, 0f);
+            break;
+
+        default:
+            return;
+    }
+
+    GameObject door = Instantiate(prefab, spawnPos, rot);
+    door.transform.parent = _doorsParent.transform;
+    door.transform.name = $"Door_{edgeDir}_({floorCell.x},{floorCell.z})";
+}
+
 
 private void TryPlaceWallOnEdge(Vector3Int floorCell, Direction edgeDir)
 {
