@@ -9,8 +9,6 @@ public abstract class BaseTrap : MonoBehaviour
     [SerializeField] protected GameObject player;
     protected PlayerController playerController;
     [SerializeField] protected MaskManager maskManager;
-    [SerializeField] protected AudioManager audioManager;
-    [SerializeField] protected AudioClip sfxTrap;
 
     protected virtual void Start()
     {
