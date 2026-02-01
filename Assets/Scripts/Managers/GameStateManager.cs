@@ -78,7 +78,7 @@ public class GameStateManager : MonoBehaviour
         yield return new WaitUntil(() => camDeath.isFinished());
 
         // Show monster slashes
-        slashAnimator.SetTrigger("Slash");
+        // HIeu handles slashAnimator.SetTrigger("Slash");
         
         // Reload Main Menu ?
         StartCoroutine(LoadAfterDelay(4f));
