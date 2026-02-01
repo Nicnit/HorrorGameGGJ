@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class MaskManager : MonoBehaviour
 {
@@ -18,6 +19,13 @@ public class MaskManager : MonoBehaviour
     ON: See Fog. Before fog distance, see traps, monster. Loud directional sound of monster.
         Amp Up Monster Aggression and Speed
     */
+    [Header("Monster Aggro Settings")]
+    // Upfront minimum aggro duration when putting on the mask
+    [SerializeField] private float aggroDurationPuttingMaskOn;
+    [Tooltip("If true, uses aggroDurationPutting as max")]
+    [SerializeField] private bool randomizeAggroDuration;
+    [SerializeField] private float minAggroDuration;
+    [SerializeField] private float timeWithoutMaskUntilAggro; // Sets Aggro for randomly 
     
     [Tooltip("Match to time of animation if animation available")]
     [SerializeField] private float maskPutOnTimer;
@@ -44,6 +52,7 @@ public class MaskManager : MonoBehaviour
     }
 
 
+    private float maskOffTime;
     private void Update()
     {
         // When mask put on/off, override current animation / cooldown and replace
@@ -59,6 +68,16 @@ public class MaskManager : MonoBehaviour
         bool toggleMask = toggleMaskAction.triggered;
         if (toggleMask)
             OnMaskTrigger();
+
+        if (!IsMaskOn)
+        {
+            maskOffTime += Time.deltaTime;
+            if (maskOffTime > timeWithoutMaskUntilAggro)
+            {
+                maskOffTime = 0;
+                SetAggroDuration();
+            }
+        }
     }
 
     private void OnMaskTrigger()
@@ -122,7 +141,8 @@ public class MaskManager : MonoBehaviour
         
         // TODO SFX Enhance Monster Audio SFX
         
-        // TODO Agrro set high monster aggro
+        // Aggro set high monster aggro
+        SetMonsterAggro();
         
         // Activate Fog
         SetFogLevel(1);
@@ -142,7 +162,9 @@ public class MaskManager : MonoBehaviour
         
         // TODO SFX change Monster Audio
         
-        // TODO Aggro change Monster Aggro
+        // Aggro change Monster Aggro
+        SetMonsterAggro();
+        
         
         // Activate Fog
         SetFogLevel(0);
@@ -151,12 +173,26 @@ public class MaskManager : MonoBehaviour
         
         // Additional SFX / VFX
     }
-    
+
+    private void SetMonsterAggro()
+    {
+        // TODO keep aggro decay after mask off? Accumulates aggro from traps over time
+        GridChaser.Instance?.ToggleAggroOverride(maskOn, true);
+    }
 
     private void SetFogLevel(float val)
     {
         fogMat.SetFloat(IntensityID, val);
     }
+
+    private void SetAggroDuration()
+    {
+        float duration = randomizeAggroDuration ? 
+            Random.Range(minAggroDuration, aggroDurationPuttingMaskOn) :  aggroDurationPuttingMaskOn;
+        // Make monster chase. After toggling off,continues chasing until timer runs out. in meantime pauses that timer.
+        GridChaser.Instance?.Aggro(duration);
+    }
     
     
+    // If long enough without mask, Aggro monster?
 }

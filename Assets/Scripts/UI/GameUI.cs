@@ -41,11 +41,11 @@ public class GameUI : MonoBehaviour
     }
 
     public void MaskOn() {
-        Mask.Play("Mask On");
+        Mask.SetTrigger("PutOnMask");           // Play("Mask On");
     }
 
     public void MaskOff()
     {
-        Mask.Play("Mask Off");
+        Mask.SetTrigger("TakeOffMask"); //Play("Mask Off");
     }
 }
