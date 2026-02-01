@@ -10,13 +10,8 @@ public class TripwireTrap : BaseTrap
         // Stun the player
         playerController.StunLock(stunDuration);
         
-        //Stunlock VFX
-        // TODO tripwire trap VFX
-        
-        // Aggro the monster
-        // TODO requires monster
+        // Stunlock VFX / trap animation? Out of scope
         
         // TODO destroy 
-        
     }
 }

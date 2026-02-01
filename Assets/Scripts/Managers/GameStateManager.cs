@@ -31,7 +31,7 @@ public class GameStateManager : MonoBehaviour
 
     private void ReachEndState()
     {
-        // End game area
+        // TODO End game / unlock final door
         throw new System.NotImplementedException();
     }
 }

@@ -36,6 +36,8 @@ public abstract class BaseTrap : MonoBehaviour
 
     protected virtual void DoTrapEffect()
     {
-        // TODO (if doing one SFX for all traps) traps SFX
+        // TODO (if doing one SFX for all traps) traps SFX + monster scream SFX
+        
+        // TODO Aggro monster 
     }
 }
