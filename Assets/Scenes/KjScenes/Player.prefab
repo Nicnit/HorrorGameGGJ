@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2604110345439740648}
   - component: {fileID: 7871672489350330240}
   - component: {fileID: 3553737641968716254}
+  - component: {fileID: 1320863880471381608}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -154,6 +155,26 @@ MonoBehaviour:
   maxPitch: 90
   sensitivity: 0.085
   playerBody: {fileID: 5023166463494329508}
+--- !u!114 &1320863880471381608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767693954449639212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8223e8876668c0b47ba85fdf203894d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  shouldBob: 1
+  normalFrequency: 2
+  normalAmplitude: 0.15
+  horizontalMult: 0.3
+  transitionSpeed: 1.5
+  pc: {fileID: 5746796296971014943}
+  sprintFrequency: 4
+  sprintAmplitude: 0.3
 --- !u!1 &4423664721788431410
 GameObject:
   m_ObjectHideFlags: 0

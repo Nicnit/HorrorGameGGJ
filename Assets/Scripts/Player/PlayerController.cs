@@ -196,6 +196,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public bool isOnGround()
+    {
+        return isGrounded;
+    }
+
+    public bool isInSprint()
+    {
+        return isSprinting;
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
