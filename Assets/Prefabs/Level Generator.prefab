@@ -87,6 +87,9 @@ MonoBehaviour:
   - {fileID: 405572304276984119, guid: c0223a91d58f25d4f86648352e300b46, type: 3}
   - {fileID: 405572304276984119, guid: 88d2978e2bc494f4ba6f578f0ed25599, type: 3}
   - {fileID: 405572304276984119, guid: c673ae6e89c9e624ab5792de6274f3af, type: 3}
+  tripwireTrapPrefab: {fileID: 5755853476216424618, guid: 88d62f63138184f2d884f45149627d16, type: 3}
+  tripwireReplaceChance: 0.25
+  tripwireY: 0.05
   doorPrefabs:
   - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
   - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
