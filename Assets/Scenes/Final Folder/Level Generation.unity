@@ -228,6 +228,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+      propertyPath: trapInHallChance
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+      propertyPath: randomObjectSpawnChance
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 2280957282962514719, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
       propertyPath: m_Name
       value: Level Generator

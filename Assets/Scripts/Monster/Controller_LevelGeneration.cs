@@ -24,6 +24,11 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject[] ceilingVariants;
     [SerializeField] private GameObject[] floorVariants;
     
+    [SerializeField] private GameObject tripwireTrapPrefab;
+    [SerializeField] private float tripwireReplaceChance = 0.25f;
+    [SerializeField] private float tripwireY = 0.05f;
+
+    
     [Header("Doors")]
     [SerializeField] private GameObject[] doorPrefabs;
     [SerializeField] private float doorChance = 1.0f;
@@ -84,6 +89,8 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private int stagedPiecesTarget = 3;    
     [SerializeField] private int stagedPlacementAttempts = 600; 
     [SerializeField] private float stagedPlacementChance = 0.6f; 
+    
+    
 
     [Serializable]
     public class StagedFloorPiece
@@ -149,6 +156,9 @@ public class Controller_LevelGeneration : MonoBehaviour
     private int _lightCounter = 0;
     private GameObject _doorsParent;
     private readonly HashSet<string> _spawnedDoorEdges = new HashSet<string>();
+    
+    private readonly HashSet<string> _spawnedTripwireCells = new HashSet<string>();
+
 
     // --------------------------
     // Unity Entry
@@ -156,6 +166,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     private void Start()
     {
         _mapParent = new GameObject("Map Container");
+        _spawnedTripwireCells.Clear();
         MapData = new MapPosition[mapWidth, mapDepth, mapHeight];
 
         InitializeMapData();
@@ -811,7 +822,7 @@ public class Controller_LevelGeneration : MonoBehaviour
                             
                             Quaternion rot = Quaternion.Euler(0f, (float)_rng.NextDouble() * 360f, 0f);
                             
-                            GameObject obj = Instantiate(objPrefab, OffsetWorldPositionWithinTile(worldPos), rot);
+                            GameObject obj = Instantiate(objPrefab, OffsetWorldPositionWithinTile(worldPos, .5f), rot);
                             
                             obj.transform.parent = _mapParent.transform;
                             obj.transform.name = $"RoomObject ({p.x},{p.z})";
@@ -856,24 +867,83 @@ public class Controller_LevelGeneration : MonoBehaviour
 
     private void GenerateTrapAt(Vector3Int p, Vector3Int position, MapElement element = MapElement.Room)
     {
+        if (element == MapElement.Hall && tripwireTrapPrefab != null && _rng.NextDouble() < tripwireReplaceChance)
+        {
+            if (TrySpawnTripwireAtHall(position))
+            {
+                MapData[position.x, position.y, position.z].Element = MapElement.Hall;
+                return;
+            }
+        }
+
         GameObject trapPrefab = trapPrefabs[_rng.Next(trapPrefabs.Length)];
         Vector3 worldPosTrap = MapPositionToWorld(p);
         GameObject trapObj = Instantiate(trapPrefab, OffsetWorldPositionWithinTile(worldPosTrap), Quaternion.identity);
         trapObj.transform.parent = _mapParent.transform;
         trapObj.transform.name = $"RoomTrap ({p.x},{p.z})";
 
-
         MapElement here = MapElement.Empty;
 
         if (element == MapElement.Room)
         {
             here = MapElement.RoomWithObject;
-        }else if (element == MapElement.Hall)
-        {
-            here = MapElement.Hall; 
         }
-        
+        else if (element == MapElement.Hall)
+        {
+            here = MapElement.Hall;
+        }
+
         MapData[position.x, position.y, position.z].Element = here;
+    }
+
+    private bool TrySpawnTripwireAtHall(Vector3Int hallCell)
+    {
+        if (!InBounds(hallCell)) return false;
+        if (MapData[hallCell.x, hallCell.y, hallCell.z].Element != MapElement.Hall) return false;
+
+        string key = $"{hallCell.x},{hallCell.y},{hallCell.z}";
+        if (_spawnedTripwireCells.Contains(key)) return false;
+
+        bool westBlocked = IsNonFloor(hallCell + new Vector3Int(-1, 0, 0));
+        bool eastBlocked = IsNonFloor(hallCell + new Vector3Int(1, 0, 0));
+        bool northBlocked = IsNonFloor(hallCell + new Vector3Int(0, 0, 1));
+        bool southBlocked = IsNonFloor(hallCell + new Vector3Int(0, 0, -1));
+
+        bool betweenWE = westBlocked && eastBlocked;
+        bool betweenNS = northBlocked && southBlocked;
+
+        if (!betweenWE && !betweenNS) return false;
+
+        Quaternion rot = Quaternion.identity;
+
+        if (betweenWE && betweenNS)
+        {
+            rot = (_rng.NextDouble() < 0.5) ? Quaternion.Euler(0f, 90f, 0f) : Quaternion.Euler(0f, 0f, 0f);
+        }
+        else if (betweenNS)
+        {
+            rot = Quaternion.Euler(0f, 0f, 0f);
+        }
+        else
+        {
+            rot = Quaternion.Euler(0f, 90f, 0f);
+        }
+
+        Vector3 center = MapPositionToWorld(hallCell);
+        Vector3 spawnPos = new Vector3(center.x, tripwireY, center.z);
+
+        GameObject obj = Instantiate(tripwireTrapPrefab, spawnPos, rot);
+        obj.transform.parent = _mapParent.transform;
+        obj.transform.name = $"TripwireTrap ({hallCell.x},{hallCell.z})";
+
+        _spawnedTripwireCells.Add(key);
+        return true;
+    }
+
+    private bool IsNonFloor(Vector3Int cell)
+    {
+        if (!InBounds(cell)) return true;
+        return !IsFloorLike(MapData[cell.x, cell.y, cell.z].Element);
     }
 
     private bool IsHall(MapElement e) => e == MapElement.Hall;
