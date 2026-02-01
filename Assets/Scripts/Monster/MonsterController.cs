@@ -104,6 +104,15 @@ public class GridChaser : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag.Equals("Player"))
+        {
+            // Kill the player
+            GameStateManager.Instance.KillPlayer();
+        }
+    }
+
     private void Update()
     {
         if (gen == null) gen = FindFirstObjectByType<Controller_LevelGeneration>();

@@ -28,8 +28,8 @@ public class CameraBob : MonoBehaviour
     {
         if (shouldBob && pc.isOnGround())
         {
-            float currFrequency = (pc.isInSprint() ? sprintFrequency : normalFrequency) * frequencyMult;
-            float currAmplitude = (pc.isInSprint() ? sprintAmplitude : normalAmplitude) * amplitudeMult;
+            float currFrequency = (pc.IsInSprint() ? sprintFrequency : normalFrequency) * frequencyMult;
+            float currAmplitude = (pc.IsInSprint() ? sprintAmplitude : normalAmplitude) * amplitudeMult;
 
             t += currFrequency * Time.deltaTime;
             float bobX = Mathf.Cos(t) * currAmplitude * horizontalMult;

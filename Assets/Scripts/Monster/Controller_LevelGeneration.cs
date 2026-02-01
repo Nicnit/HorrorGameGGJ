@@ -11,6 +11,11 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject grassPrefab;
     [SerializeField] private GameObject[] randomObjects;
+    [SerializeField] private GameObject[] trapPrefabs;
+    
+    [SerializeField] private float randomObjectSpawnChance = 0.2f;
+    [SerializeField] private float trapInHallChance = 0.1f;
+    [SerializeField] private float randomObjectTrapChance = 0.25f;
 
     [SerializeField] private GameObject playerPrefab;
 
@@ -657,18 +662,35 @@ private void BuildWallsFromMap(int y)
             }
             if (!adjacentToHall && randomObjects.Length > 0)
             {
-                // Random chance to place an object in the room cell
-                if (_rng.NextDouble() < 0.3) // 30% chance, adjust as needed
+                if (_rng.NextDouble() < randomObjectSpawnChance) 
                 {
-                    GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
-                    Vector3 worldPos = MapPositionToWorld(p);
-                    GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
-                    obj.transform.parent = _mapParent.transform;
-                    obj.transform.name = $"RoomObject ({p.x},{p.z})";
+                    
+                    // Decide whether to spawn a trap or a regular object
+                    
+                    if (trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
+                    {
+                        GenerateTrapAt(p, p, here);
+                    }
+                    else
+                    {
+                        GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
+                        Vector3 worldPos = MapPositionToWorld(p);
+                        GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
+                        obj.transform.parent = _mapParent.transform;
+                        obj.transform.name = $"RoomObject ({p.x},{p.z})";
 
-                    // Mark cell as having an object
-                    MapData[x, y, z].Element = MapElement.RoomWithObject;
+                        // Mark cell as having an object
+                        MapData[x, y, z].Element = MapElement.RoomWithObject;
+                    }
                 }
+            }
+        }
+        
+        else if (here == MapElement.Hall)
+        {
+            if (trapPrefabs.Length > 0 && _rng.NextDouble() < trapInHallChance)
+            {
+                GenerateTrapAt(p, p, here);
             }
         }
    
@@ -685,6 +707,30 @@ private void BuildWallsFromMap(int y)
 
     }
 }
+
+    private void GenerateTrapAt(Vector3Int p, Vector3Int position, MapElement element = MapElement.Room)
+    {
+        // Spawn a trap
+        GameObject trapPrefab = trapPrefabs[_rng.Next(trapPrefabs.Length)];
+        Vector3 worldPosTrap = MapPositionToWorld(p);
+        GameObject trapObj = Instantiate(trapPrefab, worldPosTrap + new Vector3(0f, 0f, 0f), Quaternion.identity);
+        trapObj.transform.parent = _mapParent.transform;
+        trapObj.transform.name = $"RoomTrap ({p.x},{p.z})";
+
+
+        MapElement here = MapElement.Empty;
+
+        if (element == MapElement.Room)
+        {
+            here = MapElement.RoomWithObject;
+        }else if (element == MapElement.Hall)
+        {
+            here = MapElement.Hall; // Halls with traps remain halls
+        }
+        
+        // Mark cell as having an object
+        MapData[position.x, position.y, position.z].Element = here;
+    }
 
 private bool IsHall(MapElement e) => e == MapElement.Hall;
 
