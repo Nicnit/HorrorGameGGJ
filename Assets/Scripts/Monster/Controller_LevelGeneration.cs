@@ -10,12 +10,19 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject grassPrefab;
+    [SerializeField] private GameObject[] randomObjects;
 
     [SerializeField] private GameObject playerPrefab;
 
     [SerializeField] private GameObject worldLightPrefab;
     //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
+    
+    [Header("Enemy Spawning")]
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private int minEnemyDistanceTiles = 12;
+    [SerializeField] private int enemySpawnAttempts = 300;
+    [SerializeField] private float enemyY = 0.5f;
 
     [Header("Grid Settings")]
     [SerializeField] private int tileSize = 5;
@@ -49,11 +56,16 @@ public class Controller_LevelGeneration : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool verboseLogs = false;
 
+    public int MapHeight { get => mapHeight;}
+    public int MapWidth { get => mapWidth;}
+    
     public enum MapElement
     {
         Empty,
         Hall,
-        Room
+        Grass,
+        Room,
+        RoomWithObject
     }
 
     private enum Direction
@@ -107,8 +119,11 @@ public class Controller_LevelGeneration : MonoBehaviour
         
         Vector3 worldPosCenter = MapPositionToWorld(center);
 
-        Instantiate(playerPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
+        Instantiate(playerPrefab, new Vector3(worldPosCenter.x, .5f, worldPosCenter.z), Quaternion.identity);
         Instantiate(worldLightPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
+        SpawnEnemyFarFrom(center);
+
+        
     }
 
     // --------------------------
@@ -218,12 +233,12 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         GameObject prefab = floorPrefab;
 
-        if (element == MapElement.Empty)
+        if (element == MapElement.Grass)
             prefab = grassPrefab;
-        
+
         Vector3 worldPos = MapPositionToWorld(position);
         GameObject tile = Instantiate(prefab, worldPos, Quaternion.identity);
-        
+
         MapData[position.x, position.y, position.z].Element = element;
 
         if (element == MapElement.Hall) _hallCells.Add(position);
@@ -232,18 +247,15 @@ public class Controller_LevelGeneration : MonoBehaviour
         tile.transform.parent = _mapParent.transform;
         tile.transform.name = $"{element} ({position.x},{position.z})";
 
-        Vector3 roofPos = new Vector3(worldPos.x, worldPos.y + wallVerticalOffset * 2, worldPos.z);
-        
-        //Do a roof - currently just a floor on the ceiling
-        if (useRoof)
+        if (useRoof && element != MapElement.Grass)
         {
+            Vector3 roofPos = new Vector3(worldPos.x, worldPos.y + wallVerticalOffset * 2, worldPos.z);
             GameObject roof = Instantiate(ceilingPrefab, roofPos, Quaternion.identity);
             roof.transform.SetParent(tile.transform);
             roof.transform.name = $"Roof ({position.x},{position.z})";
         }
-
-
     }
+
 
     private void StampRect(int y, int x0, int x1, int z0, int z1, MapElement element)
     {
@@ -530,7 +542,7 @@ public class Controller_LevelGeneration : MonoBehaviour
         );
     }
 
-    private bool InBounds(Vector3Int p)
+    public bool InBounds(Vector3Int p)
     {
         return p.x >= 0 && p.x < mapWidth
             && p.y >= 0 && p.y < mapDepth
@@ -561,8 +573,11 @@ public class Controller_LevelGeneration : MonoBehaviour
     //----------------
     //Wall Painting
     //---------------
-    private bool IsFloorLike(MapElement e) => e == MapElement.Hall || e == MapElement.Room;
+    private bool IsFloorLike(MapElement e) =>
+        e == MapElement.Hall || e == MapElement.Room || e == MapElement.RoomWithObject;
 
+    private bool IsInRoom(MapElement e) =>
+        e == MapElement.Room || e == MapElement.RoomWithObject;
 private void BuildWallsFromMap(int y)
 {
     if (_wallsParent == null)
@@ -579,9 +594,39 @@ private void BuildWallsFromMap(int y)
         MapElement here = MapData[x, y, z].Element;
         if (!IsFloorLike(here))
         {
-            InstantiateTile(p, MapElement.Empty, false);
+            InstantiateTile(p, MapElement.Grass, false);
             continue;
         }
+
+        if (IsInRoom(here))
+        {
+            //Make sure a hallway is not right next to this cell - if so, skip furniture addition
+            bool adjacentToHall = false;
+            foreach (var n in GetNeighbors4(p))
+            {
+                if (InBounds(n) && MapData[n.x, n.y, n.z].Element == MapElement.Hall)
+                {
+                    adjacentToHall = true;
+                    break;
+                }
+            }
+            if (!adjacentToHall && randomObjects.Length > 0)
+            {
+                // Random chance to place an object in the room cell
+                if (_rng.NextDouble() < 0.3) // 30% chance, adjust as needed
+                {
+                    GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
+                    Vector3 worldPos = MapPositionToWorld(p);
+                    GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
+                    obj.transform.parent = _mapParent.transform;
+                    obj.transform.name = $"RoomObject ({p.x},{p.z})";
+
+                    // Mark cell as having an object
+                    MapData[x, y, z].Element = MapElement.RoomWithObject;
+                }
+            }
+        }
+   
 
         // North edge
         TryPlaceWallOnEdge(p, Direction.North);
@@ -716,6 +761,116 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
         yield return c + new Vector3Int(0, 0, -1);
         yield return c + new Vector3Int(-1, 0, 0);
     }
+    
+    private void SpawnEnemyFarFrom(Vector3Int playerCell)
+{
+    if (enemyPrefab == null)
+    {
+        Debug.LogWarning("Enemy prefab not assigned.");
+        return;
+    }
+
+    int minDist2 = minEnemyDistanceTiles * minEnemyDistanceTiles;
+
+    bool found = false;
+    Vector3Int chosen = default;
+
+    // Try random sampling first (fast)
+    for (int i = 0; i < enemySpawnAttempts; i++)
+    {
+        // Bias toward rooms, but allow halls too
+        bool pickRoom = _roomCells.Count > 0 && _rng.NextDouble() < 0.7;
+        var list = pickRoom ? _roomCells : _hallCells;
+        if (list.Count == 0) continue;
+
+        Vector3Int cell = list[_rng.Next(list.Count)];
+
+        // Must be currently walkable (excludes RoomWithObject)
+        if (!IsWalkableCell(cell)) continue;
+
+        int dx = cell.x - playerCell.x;
+        int dz = cell.z - playerCell.z;
+        int dist2 = dx * dx + dz * dz;
+
+        if (dist2 < minDist2) continue;
+
+        chosen = cell;
+        found = true;
+        break;
+    }
+
+    // Fallback: pick the farthest walkable cell
+    if (!found)
+    {
+        int bestDist2 = -1;
+
+        void ConsiderList(List<Vector3Int> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var cell = list[i];
+                if (!IsWalkableCell(cell)) continue;
+
+                int dx = cell.x - playerCell.x;
+                int dz = cell.z - playerCell.z;
+                int dist2 = dx * dx + dz * dz;
+
+                if (dist2 > bestDist2)
+                {
+                    bestDist2 = dist2;
+                    chosen = cell;
+                }
+            }
+        }
+
+        ConsiderList(_roomCells);
+        ConsiderList(_hallCells);
+
+        found = bestDist2 >= 0;
+    }
+
+    if (!found)
+    {
+        Debug.LogWarning("Could not find a valid enemy spawn cell.");
+        return;
+    }
+
+    Vector3 world = MapPositionToWorld(chosen);
+    Instantiate(enemyPrefab, new Vector3(world.x, enemyY, world.z), Quaternion.identity);
+    Debug.Log($"Spawned enemy at cell {chosen} (minDistTiles={minEnemyDistanceTiles})");
+}
+
+    public bool TryGetRandomWalkableCell(
+        out Vector3Int cell,
+        int attempts = 200,
+        Vector3Int? avoid = null,
+        int minManhattanDist = 0)
+    {
+        for (int i = 0; i < attempts; i++)
+        {
+            int x = _rng.Next(0, mapWidth);
+            int z = _rng.Next(0, mapHeight);
+            var c = new Vector3Int(x, 0, z);
+
+            if (!IsWalkableCell(c)) continue;
+
+            if (avoid.HasValue && c == avoid.Value) continue;
+
+            if (minManhattanDist > 0 && avoid.HasValue)
+            {
+                int dx = Mathf.Abs(c.x - avoid.Value.x);
+                int dz = Mathf.Abs(c.z - avoid.Value.z);
+                if (dx + dz < minManhattanDist) continue;
+            }
+
+            cell = c;
+            return true;
+        }
+
+        cell = default;
+        return false;
+    }
+
 
 
 

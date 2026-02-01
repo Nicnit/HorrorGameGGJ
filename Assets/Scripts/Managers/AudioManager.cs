@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
 using static UnityEngine.Rendering.DebugUI;
 
@@ -13,6 +15,15 @@ public enum E_BackGroundMusic
 public enum E_SoundEffect
 {
     ButtonPressed,
+    MonsterCloseBy,
+    MonsterFootstep,
+    MonsterGrowling,
+    MaskOn,
+    MaskOff,
+    AmbientNoise1,
+    AmbientNoise2,
+    DoorOpen,
+    PlayerFootstep,
 }
 
 public class AudioManager : MonoBehaviour
@@ -25,6 +36,16 @@ public class AudioManager : MonoBehaviour
 
     [Header("Sound Effect Reference")]
     public AudioSource ButtonPressed;
+    public AudioSource MonsterCloseBy;
+    public AudioSource MonsterFootstep;
+    public AudioSource MonsterGrowling;
+    public AudioSource MaskOn;
+    public AudioSource MaskOff;
+    public AudioSource AmbientNoise1;
+    public AudioSource AmbientNoise2;
+    public AudioSource DoorOpen;
+    public AudioSource PlayerFootstep;
+
 
     [Header("Background Reference")]
     public AudioSource MainMenu;
@@ -34,6 +55,13 @@ public class AudioManager : MonoBehaviour
     public float masterVolume = -15;
     public float soundEffectVolume = -15;
     public float backgroundSliderVolume = -15;
+
+    [Header("Continuous Track")]
+    public bool PlayerIsMoving = false;
+
+    [Header("Ambident Track")]
+    public float minDelay = 20f;
+    public float maxDelay = 50f;
 
     private void Awake()
     {
@@ -53,15 +81,32 @@ public class AudioManager : MonoBehaviour
 
     }
 
+    private void Update()
+    {
+        if (PlayerIsMoving)
+        {
+            if(!PlayerFootstep.isPlaying)
+                PlayerFootstep.Play();
+        }
+        else {
+            if (PlayerFootstep.isPlaying)
+                PlayerFootstep.Stop();
+        }
+
+
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         switch (scene.name)
         {
             case "MainMenu":
                 Instance.ChangeBackground(E_BackGroundMusic.MainMenu);
+                StopCoroutine(PlaySoundRandomly());
                 break;
             case "GameTest":
                 Instance.ChangeBackground(E_BackGroundMusic.Game);
+                StartCoroutine(PlaySoundRandomly());
                 break;
         }
     }
@@ -113,6 +158,25 @@ public class AudioManager : MonoBehaviour
             case E_SoundEffect.ButtonPressed:
                 ButtonPressed.Stop();
                 break;
+        }
+    }
+
+    private IEnumerator PlaySoundRandomly()
+    {
+        while (true)
+        {
+            float delay = UnityEngine.Random.Range(minDelay, maxDelay);
+            Debug.Log(delay);
+            yield return new WaitForSeconds(delay);
+
+            // Play the sound
+            int choice = UnityEngine.Random.Range(0, 2);
+
+            if (choice == 0)
+                AmbientNoise1.Play();
+            else
+                AmbientNoise2.Play();
+
         }
     }
 }

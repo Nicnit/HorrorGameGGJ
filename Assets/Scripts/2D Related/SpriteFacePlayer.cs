@@ -14,6 +14,13 @@ public class SpriteFacePlayer : MonoBehaviour
 
     private void LateUpdate()
     {
+
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            return;
+        }
+        
         Vector3 lookAtRotation = player.transform.position - transform.position;
         Vector3 finalRotation = transform.rotation.eulerAngles;
         if (!lockXZRotation)

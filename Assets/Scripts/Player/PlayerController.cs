@@ -131,6 +131,8 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z);
+
+        AudioManager.Instance.PlayerIsMoving = rb.linearVelocity.magnitude > 1f;
     }
 
     private void Jump()
@@ -194,6 +196,16 @@ public class PlayerController : MonoBehaviour
             maxStunTime = newStunTime;
             stunTime = 0f;
         }
+    }
+
+    public bool isOnGround()
+    {
+        return isGrounded;
+    }
+
+    public bool isInSprint()
+    {
+        return isSprinting;
     }
 
 #if UNITY_EDITOR

@@ -22,10 +22,7 @@ public class GameUI : MonoBehaviour
 
         Cursor.visible = isPaused;
         if (isPaused) Cursor.lockState = CursorLockMode.None;
-
-        Debug.Log(isPaused);
-        Debug.Log(Cursor.visible);
-        Debug.Log(Cursor.lockState);
+        Debug.Log("Pressed");
 
         pauseMenu.SetActive(isPaused);
         Time.timeScale = isPaused ? 0f : 1f;
@@ -37,6 +34,7 @@ public class GameUI : MonoBehaviour
     }
 
     public void Exit() {
+        Debug.Log("Pressed");
         SceneManager.LoadScene("MainMenu");
     }
 }
