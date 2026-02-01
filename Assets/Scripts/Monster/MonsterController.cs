@@ -60,6 +60,7 @@ public class GridChaser : MonoBehaviour
     [SerializeField] private Mode _mode = Mode.Wander;
 
     private float _aggroTimeRemaining;
+    private bool _aggroOverride;
 
     private float _chaseRepathT;
     private Vector3Int _chaseTargetCell;
@@ -244,6 +245,34 @@ public class GridChaser : MonoBehaviour
         _chaseRepathT = 999f;
     }
 
+    public void ToggleAggroOverride(bool overrideState, bool decayUponDisable = true)
+    {
+        if (overrideState)
+        {
+            _aggroOverride = true;
+            aggressionLevel = 1f;
+            _aggroTimeRemaining = 0f;
+            _mode = Mode.Chase;
+            _chaseRepathT = 999f;
+            return;
+        }
+
+        _aggroOverride = false;
+
+        if (decayUponDisable)
+        {
+            aggressionLevel = 1f;
+            _aggroTimeRemaining = Mathf.Max(0.01f, aggressionDecaySeconds);
+            _mode = Mode.Chase;
+            _chaseRepathT = 999f;
+        }
+        else
+        {
+            aggressionLevel = 0f;
+            _aggroTimeRemaining = 0f;
+        }
+    }
+
     public void SetPlayerHidden(bool hidden)
     {
         playerHidden = hidden;
@@ -251,15 +280,23 @@ public class GridChaser : MonoBehaviour
         {
             aggressionLevel = 0f;
             _aggroTimeRemaining = 0f;
+            _aggroOverride = false;
         }
     }
 
     private void TickAggro(float dt)
     {
+        if (_aggroOverride)
+        {
+            aggressionLevel = 1f;
+            _aggroTimeRemaining = 0f;
+            return;
+        }
+
         if (_aggroTimeRemaining > 0f)
         {
             _aggroTimeRemaining -= dt;
-            float t = Mathf.Clamp01(_aggroTimeRemaining / aggressionDecaySeconds);
+            float t = Mathf.Clamp01(_aggroTimeRemaining / Mathf.Max(0.01f, aggressionDecaySeconds));
             aggressionLevel = t;
         }
         else
