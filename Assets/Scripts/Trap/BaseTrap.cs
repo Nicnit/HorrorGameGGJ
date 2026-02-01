@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 public abstract class BaseTrap : MonoBehaviour
 {
-    [SerializeField] protected float aggressionDuration;
+    [SerializeField] protected float aggressionDuration = 4f;
     [SerializeField] protected MeshRenderer trapVFX;
     [SerializeField] protected GameObject player;
     protected PlayerController playerController;
