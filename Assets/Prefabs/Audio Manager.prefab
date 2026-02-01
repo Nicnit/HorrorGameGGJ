@@ -307,8 +307,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6698e04a8e478e1cfa8d35502ea8302d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
-  BackgroundMusic: {fileID: 496349736857497355}
-  SoundEffect: {fileID: 8622417882990749527}
+  BackgroundMusic: {fileID: 6883857840633065541}
+  SoundEffect: {fileID: 4539612895156222047}
   ButtonPressed: {fileID: 1682050319537657805}
   MainMenu: {fileID: 4539612895156222047}
   Game: {fileID: 6883857840633065541}
