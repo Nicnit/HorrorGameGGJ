@@ -27,10 +27,13 @@ public class InteractableNote : BaseInteractable
         // update progress manager to include this note as done/read
         FinishInteractable();
 
-        NoteUI note = FindFirstObjectByType<NoteUI>();
+        if (isMonster == false)
+        {
 
-        // Show Note UI
-        note.ShowNote();
+            NoteUI note = FindFirstObjectByType<NoteUI>();
+
+            // Show Note UI
+            note.ShowNote();
 
         // Do note sound effect
         AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Note);
