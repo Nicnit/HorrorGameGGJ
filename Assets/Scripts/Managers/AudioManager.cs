@@ -95,30 +95,32 @@ public class AudioManager : MonoBehaviour
                 PlayerFootstep.Stop();
         }
 
-        if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 20f)
-        {
-            if (!MonsterFootstep.isPlaying)
-                MonsterFootstep.Play();
+        if (FindFirstObjectByType<GridChaser>()) {
+            if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 20f)
+            {
+                if (!MonsterFootstep.isPlaying)
+                    MonsterFootstep.Play();
 
-        }
-        else
-        {
-            if (MonsterFootstep.isPlaying)
-                MonsterFootstep.Stop();
-        }
+            }
+            else
+            {
+                if (MonsterFootstep.isPlaying)
+                    MonsterFootstep.Stop();
+            }
 
-        if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 20f)
-        {
-            if (!MonsterCloseBy.isPlaying)
-                MonsterCloseBy.Play();
+            if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 20f)
+            {
+                if (!MonsterCloseBy.isPlaying)
+                    MonsterCloseBy.Play();
 
-        }
+            }
 
-        if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 10f)
-        {
-            if (!MonsterGrowling.isPlaying)
-                MonsterGrowling.Play();
+            if (FindFirstObjectByType<GridChaser>().DistanceToPlayer < 10f)
+            {
+                if (!MonsterGrowling.isPlaying)
+                    MonsterGrowling.Play();
 
+            }
         }
     }
 

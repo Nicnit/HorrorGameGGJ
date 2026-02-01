@@ -195,6 +195,24 @@ public class PlayerController : MonoBehaviour
     {
         return isSprinting;
     }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Monster"))
+        {
+            FindFirstObjectByType<Death>().PlayDeath();
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck == null) return;
+        Gizmos.color = isGrounded ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+    }
+#endif
+}
     
     // Not sure why this is here tbh
     public int CurrentNote = 0;  
