@@ -171,6 +171,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7964543834983140107, guid: a9ee69e6f9c81564b8dbb9599471cbd7, type: 3}
+      propertyPath: Loop
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -224,34 +228,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: wallVariants.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[0]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[2]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[3]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[2]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: c19d2f87492fda940af58e6c35415de6, type: 3}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[3]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: d2bdd1b8f53a29641b4bd1dd5685e114, type: 3}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: 'wallVariants.Array.data[4]'
-      value: 
-      objectReference: {fileID: 1476645145883747998, guid: 57b4555eb38cf634a8e4e998a2e52c91, type: 3}
     - target: {fileID: 2280957282962514719, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
       propertyPath: m_Name
       value: Level Generator

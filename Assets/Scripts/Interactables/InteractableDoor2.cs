@@ -18,13 +18,17 @@ public class InteractableDoor2 : BaseInteractable
     }
     
      
-    protected override void OnInteractionTrigger()
+    protected override void OnInteractionTrigger(bool isMonster = false)
     {
         // update progress manager to include this note as done/read
         FinishInteractable();
 
-        // Do note sound effect
-        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.DoorOpen);
+        if ((isMonster && FindFirstObjectByType<GridChaser>().DistanceToPlayer < 10f) || !isMonster)
+        {
+            // Do note sound effect
+            AudioManager.Instance.PlaySoundEffect(E_SoundEffect.DoorOpen);
+        }
+
         StartCoroutine(RotateCoroutine(rotationAmountL, 2f, doorLeft));
         StartCoroutine(RotateCoroutine(rotationAmountR, 2f, doorRight));
 
