@@ -13,9 +13,6 @@ using UnityEngine.SceneManagement;
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance { get; private set; }
-    
-    private GameObject monsterSlashEffect; 
-    Animator slashAnimator;
 
     public int completeNotes = 0;
     [SerializeField] private int NumNotesToFind = 3;
@@ -32,11 +29,6 @@ public class GameStateManager : MonoBehaviour
 
     private void Start()
     {
-        monsterSlashEffect = GameObject.Find("MonsterSlashEffect");
-        if (monsterSlashEffect != null)
-            slashAnimator = monsterSlashEffect.GetComponent<Animator>();
-        
-        
         Application.targetFrameRate = 60; 
         QualitySettings.vSyncCount = 1;
     }
@@ -66,7 +58,7 @@ public class GameStateManager : MonoBehaviour
         // Freeze player and monster movement
         
         // Show monster slashes
-        slashAnimator.SetTrigger("Slash");
+        // HIeu handles slashAnimator.SetTrigger("Slash");
         
         // Reload Main Menu ?
         StartCoroutine(LoadAfterDelay(4f));

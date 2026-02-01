@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -8,6 +9,12 @@ public class GameUI : MonoBehaviour
     private bool isPaused = false;
     public Animator Mask;
     public bool isMaskOn = false;
+
+    private void Start()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
 
     // Update is called once per frame
     void Update()
