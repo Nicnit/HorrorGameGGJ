@@ -82,6 +82,8 @@ public class GridChaser : MonoBehaviour
     private bool _lastLosHadHit;
     private float _losLogT;
 
+    public float DistanceToPlayer = 1000f;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -109,6 +111,8 @@ public class GridChaser : MonoBehaviour
         if (gen == null || field == null) return;
 
         if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        DistanceToPlayer = (Vector3.Distance(_lastLosOrigin, _lastLosTarget));
 
         TickAggro(Time.deltaTime);
 

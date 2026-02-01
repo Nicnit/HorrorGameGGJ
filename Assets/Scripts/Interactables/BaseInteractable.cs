@@ -43,6 +43,10 @@ public abstract class BaseInteractable : MonoBehaviour
             playerInRange = true;
             ToggleUINotice(true);
         }
+        else if (other.CompareTag("Monster"))
+        {
+            OnInteractionTrigger(true);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -62,5 +66,5 @@ public abstract class BaseInteractable : MonoBehaviour
     /// <summary>
     /// When player performs interaction
     /// </summary>
-    protected abstract void OnInteractionTrigger();
+    protected abstract void OnInteractionTrigger(bool isMonster = false);
 }
