@@ -1,5 +1,14 @@
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.Net.Sockets;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static Unity.Collections.Unicode;
+using static UnityEditor.FilePathAttribute;
+using static UnityEngine.ParticleSystem;
+using UnityEngine.InputSystem.HID;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
@@ -47,6 +56,16 @@ public class PlayerController : MonoBehaviour
 
     private float maxStunTime = 3f;
     private float stunTime = 3f;
+    public int CurrentNote = 0;
+    public List<string> NoteList = new List<string>()
+    {
+        "This is a note to anyone who may find this. I’m trapped. I don’t know how, why, or where I am. For that matter, I must have been taken in my sleep. Why, I don’t know; sorry, not important. I tend to ramble. I’ll be slipping this out via the sewer. If you can trace this back to me, I will be most....",
+        "[Note is torned] ...Twisting, turning, reeling. Bones break, blood curdles, flesh ripped. They’re all around me. How did I get here? Who is here? What is here? Can I hear? Can I see? Nothing. Nothing but the masks. The masks help me see.\r\n\r\nDays and days they try to break me. ME? HA! I’m better than that, right? They stop, but I see. I see it—the fellow who stalks the hallways here at North Folk. He oozes but leaves no trails. My friend, a pound of immovable flesh that keeps getting closer, setting up his tricks and traps. He is a clever one.\r\n\r\nBUT, BUT, BUT... I know his clever little secret. These eyes don’t work, so get new eyes. A new face by becoming unrecognizable. You recognize it? He comes closer now. I’m ready for him. Are you?",
+        "With you and with me, E [the name is burned out] w  June 11th 2005 ",
+        "Yo what up ima do poetry that pretty obous think that bit in bendy with the weird alter thing in chapter 1   Gather unto thee the following artifacts of your gaze To escape the confines of this maze    -Childs doll -A knife -A pair of dice -A bar of gold -The ink of an esteemed man  ",
+        "Northfolk medical center\r\n\r\nName of patient: gordon ramsey \r\n\r\nDate of admission June 11th 2005 \r\n\r\nAdmit Order signed by the honerable judge nick bolton\r\n\r\nLocation of last admittance: First Admitance \r\n\r\nDOB 12/20/1994\r\n\r\nDangerous to self: yes\r\n\r\nDangrous to others: yes \r\n\r\nReason for admittance: On the 6t of march 2005 patchent entered the big yak club in las vagas and shocker he blew all his money long story short wife tried to leave him so he killed em witha knife \r\n\r\nPatchent has so far forsfully rejected all attempts at medication\r\n"
+    };
+
 
     private void Start()
     {
