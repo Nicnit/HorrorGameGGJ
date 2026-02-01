@@ -53,7 +53,7 @@ MonoBehaviour:
   repathCooldown: 0.05
   turnSpeed: 10
   aggressionLevel: 0
-  aggressionDecaySeconds: 15
+  aggressionDecaySeconds: 5
   aggroSpeedMax: 5
   aggroSpeedMin: 3
   closeChaseSpeed: 3

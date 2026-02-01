@@ -17,6 +17,9 @@ public class GameStateManager : MonoBehaviour
     private GameObject monsterSlashEffect; 
     Animator slashAnimator;
 
+    public int completeNotes = 0;
+    [SerializeField] private int NumNotesToFind = 3;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -49,14 +52,15 @@ public class GameStateManager : MonoBehaviour
         // If notes are found
         // Increase intensity with more notes found?
 
-        int numFinished = 0;
-        foreach (BaseInteractable interactable in objectiveInteractables)
-        {
-            if (interactable != null && interactable.IsFinished())
-                numFinished++;
-        }
+        //int numFinished = 0;
+        //foreach (BaseInteractable interactable in objectiveInteractables)
+        //{
+         //   if (interactable != null && interactable.IsFinished())
+        //        numFinished++;
+        //}
         
-        if (numFinished >= objectiveInteractables.Count)
+        //if (numFinished >= objectiveInteractables.Count)
+        if (completeNotes >= NumNotesToFind)    
             ReachEndState();
     }
 
@@ -81,7 +85,13 @@ public class GameStateManager : MonoBehaviour
 
     private void ReachEndState()
     {
-        // TODO End game / unlock final door
-        throw new System.NotImplementedException();
+        StartCoroutine(LoadAfterDelay(10f));
+    }
+
+    IEnumerator TimerReadingTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        
+        SceneManager.LoadScene(0);
     }
 }

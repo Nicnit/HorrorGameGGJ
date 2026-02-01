@@ -39,6 +39,9 @@ public class InteractableNote : BaseInteractable
             this.gameObject.SetActive(false);
         }
 
-        
+        // Do note sound effect
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Note);
+        GameStateManager.Instance.completeNotes++;
+        this.gameObject.SetActive(false);
     }
 }
