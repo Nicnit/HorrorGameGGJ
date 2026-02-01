@@ -38,6 +38,9 @@ public class GameStateManager : MonoBehaviour
         QualitySettings.vSyncCount = 1;
     }
 
+    private int numNotes = 3;
+    public int numFoundNotes = 0;
+
 
     [Tooltip("Player must reach these items to reach endstate")]
     List<BaseInteractable> objectiveInteractables = new List<BaseInteractable>();
@@ -49,15 +52,10 @@ public class GameStateManager : MonoBehaviour
         // If notes are found
         // Increase intensity with more notes found?
 
-        int numFinished = 0;
-        foreach (BaseInteractable interactable in objectiveInteractables)
+        if (numFoundNotes >= numNotes)
         {
-            if (interactable != null && interactable.IsFinished())
-                numFinished++;
-        }
-        
-        if (numFinished >= objectiveInteractables.Count)
             ReachEndState();
+        }
     }
 
     public void KillPlayer()
@@ -76,12 +74,13 @@ public class GameStateManager : MonoBehaviour
     private IEnumerator LoadAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
+        
         SceneManager.LoadScene(0);
     }
 
     private void ReachEndState()
     {
-        // TODO End game / unlock final door
-        throw new System.NotImplementedException();
+        // Give time to read etc
+        LoadAfterDelay(8f);
     }
 }
