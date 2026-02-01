@@ -22,7 +22,7 @@ public class InteractableNote : BaseInteractable
     }
 
 
-    protected override void OnInteractionTrigger()
+    protected override void OnInteractionTrigger(bool isMonster = false)
     {
         // update progress manager to include this note as done/read
         FinishInteractable();

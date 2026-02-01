@@ -63,6 +63,8 @@ MonoBehaviour:
   - {fileID: 5146296316724709025, guid: b4e2f15d5f90e554ebe4b62651ce165d, type: 3}
   - {fileID: 2017405188502108377, guid: 369bbd0d527ca1a45935eb887f68549d, type: 3}
   - {fileID: 8081646803540556620, guid: 28a11465e63187b4aa59d293067fd745, type: 3}
+  - {fileID: 2605676774829917753, guid: c69acafee7cc14fb8b7e936434ca7299, type: 3}
+  - {fileID: 1208074685239165335, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
   playerPrefab: {fileID: 6705697775075807597, guid: 7d1c00746275844458465bd6cdadb08a, type: 3}
   worldLightPrefab: {fileID: 8096542298612641285, guid: 4d53a4540024e5047af40158f980bc7c, type: 3}
   wallVariants:
@@ -71,6 +73,7 @@ MonoBehaviour:
   - {fileID: 1476645145883747998, guid: 37c0d512386b39f4e82bd13a853b8fa5, type: 3}
   - {fileID: 1476645145883747998, guid: 37c0d512386b39f4e82bd13a853b8fa5, type: 3}
   - {fileID: 1476645145883747998, guid: 7b19b3b71a738384f91238eb3841e849, type: 3}
+  - {fileID: 1476645145883747998, guid: 89d59f638c253324489dda95fe3e5d55, type: 3}
   ceilingVariants:
   - {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
   - {fileID: 405572304276984119, guid: 86371f8f8e176454aa856a08a8b89a21, type: 3}
@@ -84,6 +87,12 @@ MonoBehaviour:
   - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
   - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
   doorChance: 1
+  notePrefab: {fileID: 8432962807303128876, guid: 815b0a822bd60674e9268aa11ca6b56c, type: 3}
+  noteY: 0.1
+  noteCornerSampleRadius: 1
+  noteCornerInset: 2
+  noteAttemptsPerCornerFallback: 250
+  noteMinDistanceTilesFromPlayer: 3
   enemyPrefab: {fileID: 454744764324180953, guid: 70d47b3ca03a8a44ea3ad770a278904f, type: 3}
   minEnemyDistanceTiles: 12
   enemySpawnAttempts: 300
