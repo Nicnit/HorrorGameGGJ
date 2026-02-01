@@ -212,7 +212,6 @@ public class PlayerController : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
     }
 #endif
-}
     
     // Not sure why this is here tbh
     public int CurrentNote = 0;  
