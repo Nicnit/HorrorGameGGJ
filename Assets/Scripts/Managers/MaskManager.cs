@@ -138,11 +138,11 @@ public class MaskManager : MonoBehaviour
     {
         maskOn = true;
         Debug.Log("SetMaskOn");
-        
+
         // Mask is officially on, effects start immediately
-        
+
         // TODO SFX Enhance Monster Audio SFX
-        
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.MaskOn);
         // Aggro set high monster aggro
         SetMonsterAggro();
         
@@ -158,12 +158,12 @@ public class MaskManager : MonoBehaviour
     {
         maskOn = false;
         Debug.Log("SetMaskOff");
-        
+
         // Mask is officially off, effects start immediately
-        
-        
+
+
         // TODO SFX change Monster Audio
-        
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.MaskOff);
         // Aggro change Monster Aggro
         SetMonsterAggro();
         

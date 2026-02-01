@@ -71,7 +71,8 @@ public abstract class BaseTrap : MonoBehaviour
     protected virtual void DoTrapEffect()
     {
         // TODO (if doing one SFX for all traps) traps SFX + monster scream SFX
-        
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Trap);
+
         // Aggro monster
         GridChaser.Instance?.Aggro(aggressionDuration, false);
     }
