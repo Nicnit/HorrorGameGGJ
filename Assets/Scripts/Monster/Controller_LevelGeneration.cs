@@ -20,7 +20,6 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject playerPrefab;
 
     [SerializeField] private GameObject worldLightPrefab;
-    //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
     [SerializeField] private GameObject[] ceilingVariants;
     [SerializeField] private GameObject[] floorVariants;
@@ -79,6 +78,32 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private float variantWallChance = 0.3f;
     [SerializeField] private float variantFloorChance = 0.3f;
     
+    
+    [Header("Staged Room Sets")]
+    [SerializeField] private StagedFloorPiece[] stagedFloorPieces;
+    [SerializeField] private int stagedPiecesTarget = 3;    
+    [SerializeField] private int stagedPlacementAttempts = 600; 
+    [SerializeField] private float stagedPlacementChance = 0.6f; 
+
+    [Serializable]
+    public class StagedFloorPiece
+    {
+        public GameObject prefab;
+
+        [Min(1)] public int width = 1;
+        [Min(1)] public int height = 1;  
+
+        [Range(0f, 1f)] public float weight = 1f;
+
+        public bool allowRotate90 = true;
+
+        [Tooltip("How much to inset from tile edges when positioning (helps avoid clipping walls).")]
+        public float inset = 0.6f;
+
+        [Tooltip("If true, every tile in the footprint must NOT be adjacent to any hall (avoids blocking doorways).")]
+        public bool requireNotAdjacentToHall = true;
+    }
+    
 
     [Header("Debug")]
     [SerializeField] private bool verboseLogs = false;
@@ -112,8 +137,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     }
 
     public MapPosition[,,] MapData;
-
-    // Track placed tiles by type (makes trunk/room placement reliable)
+    
     private readonly List<Vector3Int> _hallCells = new List<Vector3Int>();
     private readonly List<Vector3Int> _roomCells = new List<Vector3Int>();
     
@@ -137,14 +161,13 @@ public class Controller_LevelGeneration : MonoBehaviour
         InitializeMapData();
 
         Vector3Int center = new Vector3Int(mapWidth / 2, 0, mapHeight / 2);
-
-        // Starter room
+        
         StampRect(center.y, center.x - 1, center.x + 1, center.z - 1, center.z + 1, MapElement.Room);
-
-        // Starter hall stubs so painting has valid trunks immediately
+        
         SeedHallStubsFromStartRoom(center);
 
         RunPaint(paintBudget);
+        PlaceStagedRoomSets();
         BuildWallsFromMap(0);
         
         Vector3 worldPosCenter = MapPositionToWorld(center);
@@ -182,8 +205,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     private void RunPaint(int budget)
     {
         int jumps = 0;
-
-        // Count the starter room toward your min/max target
+        
         int targetRooms = _rng.Next(minRooms, maxRooms + 1);
         int roomsPlaced = _roomCells.Count > 0 ? 1 : 0;
 
@@ -192,7 +214,6 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         while (budget > 0 && jumps < maxJumps)
         {
-            // Occasionally try to attach a room to the current hall tile
             if (roomsPlaced < targetRooms && _rng.NextDouble() < roomAttemptChancePerPaintStep)
             {
                 if (MapData[pos.x, pos.y, pos.z].Element == MapElement.Hall)
@@ -201,7 +222,6 @@ public class Controller_LevelGeneration : MonoBehaviour
                     {
                         roomsPlaced++;
 
-                        // Jump away after stamping a room so we don't clump
                         if (TryPickRandomTrunk(out pos, out dir))
                         {
                             jumps++;
@@ -211,7 +231,6 @@ public class Controller_LevelGeneration : MonoBehaviour
                 }
             }
 
-            // Random jump sometimes for variety + coverage
             if (_rng.NextDouble() < jumpChancePerStep)
             {
                 if (TryPickRandomTrunk(out pos, out dir))
@@ -222,12 +241,10 @@ public class Controller_LevelGeneration : MonoBehaviour
                 break;
             }
 
-            // Try to place a hall step
             Direction nextDir = AttemptHallStep(pos, dir, out Vector3Int nextPos);
 
             if (nextDir == Direction.None)
             {
-                // stuck => jump to a new trunk
                 if (TryPickRandomTrunk(out pos, out dir))
                 {
                     jumps++;
@@ -240,9 +257,8 @@ public class Controller_LevelGeneration : MonoBehaviour
             pos = nextPos;
             dir = nextDir;
         }
-
-        // Guarantee min rooms if RNG / constraints didn’t hit it
-        int minTarget = Mathf.Max(minRooms, 1); // at least the starter
+        
+        int minTarget = Mathf.Max(minRooms, 1); 
         int deficit = minTarget - roomsPlaced;
         if (deficit > 0)
         {
@@ -252,6 +268,136 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         Debug.Log($"Rooms placed: {roomsPlaced}/{targetRooms} (min={minRooms})");
     }
+    
+    private void PlaceStagedRoomSets()
+    {
+        if (stagedFloorPieces == null || stagedFloorPieces.Length == 0) return;
+        if (_roomCells.Count == 0) return;
+
+        int placed = 0;
+
+        for (int attempt = 0; attempt < stagedPlacementAttempts && placed < stagedPiecesTarget; attempt++)
+        {
+            if (_rng.NextDouble() > stagedPlacementChance) continue;
+
+            if (!TryPickWeightedStagedPiece(out StagedFloorPiece piece)) continue;
+
+            Vector3Int anchor = _roomCells[_rng.Next(_roomCells.Count)];
+            
+            int rotSteps = piece.allowRotate90 ? _rng.Next(0, 4) : (_rng.Next(0, 2) * 2);
+            int w = piece.width;
+            int h = piece.height;
+
+            if (rotSteps % 2 == 1)
+            {
+                int tmp = w;
+                w = h;
+                h = tmp;
+            }
+
+            if (!IsRoomFootprintValid(anchor, w, h, piece.requireNotAdjacentToHall))
+                continue;
+
+            SpawnStagedPiece(piece, anchor, rotSteps);
+            
+            MarkFootprint(anchor, w, h, MapElement.RoomWithObject);
+
+            placed++;
+        }
+
+        if (placed < stagedPiecesTarget)
+        {
+            Debug.Log($"Placed {placed}/{stagedPiecesTarget} staged sets. (More attempts or smaller pieces increases success rate.)");
+        }
+    }
+
+    private bool TryPickWeightedStagedPiece(out StagedFloorPiece piece)
+    {
+        piece = null;
+
+        float total = 0f;
+        for (int i = 0; i < stagedFloorPieces.Length; i++)
+        {
+            var p = stagedFloorPieces[i];
+            if (p == null || p.prefab == null) continue;
+            if (p.weight <= 0f) continue;
+            total += p.weight;
+        }
+        if (total <= 0f) return false;
+
+        float r = (float)_rng.NextDouble() * total;
+        float acc = 0f;
+
+        for (int i = 0; i < stagedFloorPieces.Length; i++)
+        {
+            var p = stagedFloorPieces[i];
+            if (p == null || p.prefab == null) continue;
+            if (p.weight <= 0f) continue;
+
+            acc += p.weight;
+            if (r <= acc)
+            {
+                piece = p;
+                return true;
+            }
+        }
+
+        return false;
+    }
+    
+    private bool IsRoomFootprintValid(Vector3Int anchor, int w, int h, bool requireNotAdjacentToHall)
+    {
+        for (int dx = 0; dx < w; dx++)
+        for (int dz = 0; dz < h; dz++)
+        {
+            var c = new Vector3Int(anchor.x + dx, anchor.y, anchor.z + dz);
+            if (!InBounds(c)) return false;
+
+            var e = MapData[c.x, c.y, c.z].Element;
+            if (e != MapElement.Room) return false;
+
+            if (requireNotAdjacentToHall && IsAdjacentToHall(c))
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool IsAdjacentToHall(Vector3Int cell)
+    {
+        foreach (var n in GetNeighbors4(cell))
+        {
+            if (InBounds(n) && MapData[n.x, n.y, n.z].Element == MapElement.Hall)
+                return true;
+        }
+        return false;
+    }
+
+    private void MarkFootprint(Vector3Int anchor, int w, int h, MapElement markAs)
+    {
+        for (int dx = 0; dx < w; dx++)
+        for (int dz = 0; dz < h; dz++)
+        {
+            var c = new Vector3Int(anchor.x + dx, anchor.y, anchor.z + dz);
+            if (!InBounds(c)) continue;
+            MapData[c.x, c.y, c.z].Element = markAs;
+        }
+    }
+
+
+    private void SpawnStagedPiece(StagedFloorPiece piece, Vector3Int anchor, int rotSteps)
+    {
+        Vector3 anchorWorld = MapPositionToWorld(anchor);
+        
+        Vector3 spawnPos = OffsetWorldPositionWithinTile(anchorWorld, piece.inset);
+
+        Quaternion rot = Quaternion.Euler(0f, rotSteps * 90f, 0f);
+
+        GameObject obj = Instantiate(piece.prefab, spawnPos, rot);
+        obj.transform.SetParent(_mapParent.transform);
+        obj.name = $"StagedSet_{piece.prefab.name}_({anchor.x},{anchor.z})_rot{rotSteps * 90}";
+    }
+
 
     // --------------------------
     // Tile Placement
@@ -268,7 +414,6 @@ public class Controller_LevelGeneration : MonoBehaviour
         
         if (element == MapElement.Hall || element == MapElement.Room)
         {
-            // Chance to use a variant floor
             if (_rng.NextDouble() < variantFloorChance && floorVariants.Length > 0)
             {
                 prefab = floorVariants[_rng.Next(floorVariants.Length)];
@@ -310,8 +455,6 @@ public class Controller_LevelGeneration : MonoBehaviour
 
     private void SeedHallStubsFromStartRoom(Vector3Int center)
     {
-        // 3x3 room occupies center +/-1.
-        // Stubs go 1 tile beyond that => +/-2.
         var stubs = new[]
         {
             new Vector3Int(center.x,     center.y, center.z + 2),
@@ -375,7 +518,6 @@ public class Controller_LevelGeneration : MonoBehaviour
             Direction.West
         };
 
-        // Stickiness: prefer continuing the same direction sometimes
         if (_rng.NextDouble() < directionalStickiness && dir != Direction.None)
         {
             if (TryPlaceHall(position, dir, out newPos))
@@ -405,10 +547,8 @@ public class Controller_LevelGeneration : MonoBehaviour
         if (!InBounds(newPos)) return false;
         if (MapData[newPos.x, newPos.y, newPos.z].Element != MapElement.Empty) return false;
 
-        // Prevent 2x2 HALL blocks (rooms are allowed to be chunky; halls stay thin)
         if (WouldCreate2x2HallBlock(newPos)) return false;
 
-        // Keep halls tree-ish: don't connect into multiple hall neighbors
         int adjacentHalls = CountAdjacentHallsXZ(newPos);
         if (adjacentHalls > 1) return false;
 
@@ -467,8 +607,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     private bool TryStampRoomFromHall(Vector3Int hallAnchor, int y, out (int x0, int x1, int z0, int z1) rect)
     {
         rect = default;
-
-        // Try a few directions; we need an empty "door cell" adjacent to the hall
+        
         var dirs = new List<Direction> { Direction.North, Direction.East, Direction.South, Direction.West };
         ShuffleDirections(dirs);
 
@@ -480,9 +619,7 @@ public class Controller_LevelGeneration : MonoBehaviour
 
             int w = _rng.Next(roomWidthRange.x, roomWidthRange.y + 1);
             int h = _rng.Next(roomHeightRange.x, roomHeightRange.y + 1);
-
-            // Build a rectangle that starts at the door and extends outward in direction d
-            // Randomize lateral offset so the door isn't always centered
+            
             int lateral = (d == Direction.North || d == Direction.South) ? w : h;
             int lateralOffset = _rng.Next(0, lateral); 
 
@@ -524,8 +661,7 @@ public class Controller_LevelGeneration : MonoBehaviour
 
             if (!IsRectInBounds(y, x0, x1, z0, z1)) continue;
             if (!IsRectEmpty(y, x0, x1, z0, z1)) continue;
-
-            // Stamp room
+            
             for (int x = x0; x <= x1; x++)
             for (int z = z0; z <= z1; z++)
                 InstantiateTile(new Vector3Int(x, y, z), MapElement.Room);
@@ -622,98 +758,107 @@ public class Controller_LevelGeneration : MonoBehaviour
 
     private bool IsInRoom(MapElement e) =>
         e == MapElement.Room || e == MapElement.RoomWithObject;
-private void BuildWallsFromMap(int y)
-{
-    if (_wallsParent == null)
-        _wallsParent = new GameObject("Walls Container");
-    
-    if (_doorsParent == null)
-        _doorsParent = new GameObject("Doors Container");
-    
-    _spawnedDoorEdges.Clear();
-
-
-    _spawnedWallEdges.Clear();
-
-    for (int x = 0; x < mapWidth; x++)
-    for (int z = 0; z < mapHeight; z++)
+    private void BuildWallsFromMap(int y)
     {
-        var p = new Vector3Int(x, y, z);
-        if (!InBounds(p)) continue;
-
-        MapElement here = MapData[x, y, z].Element;
-        if (!IsFloorLike(here))
-        {
-            InstantiateTile(p, MapElement.Grass, false);
-            continue;
-        }
-
-        if (IsInRoom(here))
-        {
-            //Make sure a hallway is not right next to this cell - if so, skip furniture addition
-            bool adjacentToHall = false;
-            foreach (var n in GetNeighbors4(p))
-            {
-                if (InBounds(n) && MapData[n.x, n.y, n.z].Element == MapElement.Hall)
-                {
-                    adjacentToHall = true;
-                    break;
-                }
-            }
-            if (!adjacentToHall && randomObjects.Length > 0)
-            {
-                if (_rng.NextDouble() < randomObjectSpawnChance) 
-                {
-                    
-                    // Decide whether to spawn a trap or a regular object
-                    
-                    if (trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
-                    {
-                        GenerateTrapAt(p, p, here);
-                    }
-                    else
-                    {
-                        GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
-                        Vector3 worldPos = MapPositionToWorld(p);
-                        GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
-                        obj.transform.parent = _mapParent.transform;
-                        obj.transform.name = $"RoomObject ({p.x},{p.z})";
-
-                        // Mark cell as having an object
-                        MapData[x, y, z].Element = MapElement.RoomWithObject;
-                    }
-                }
-            }
-        }
+        if (_wallsParent == null)
+            _wallsParent = new GameObject("Walls Container");
         
-        else if (here == MapElement.Hall)
+        if (_doorsParent == null)
+            _doorsParent = new GameObject("Doors Container");
+        
+        _spawnedDoorEdges.Clear();
+
+
+        _spawnedWallEdges.Clear();
+
+        for (int x = 0; x < mapWidth; x++)
+        for (int z = 0; z < mapHeight; z++)
         {
-            if (trapPrefabs.Length > 0 && _rng.NextDouble() < trapInHallChance)
+            var p = new Vector3Int(x, y, z);
+            if (!InBounds(p)) continue;
+
+            MapElement here = MapData[x, y, z].Element;
+            if (!IsFloorLike(here))
             {
-                GenerateTrapAt(p, p, here);
+                InstantiateTile(p, MapElement.Grass, false);
+                continue;
             }
+
+            if (here == MapElement.Room)
+            {
+                bool adjacentToHall = false;
+                foreach (var n in GetNeighbors4(p))
+                {
+                    if (InBounds(n) && MapData[n.x, n.y, n.z].Element == MapElement.Hall)
+                    {
+                        adjacentToHall = true;
+                        break;
+                    }
+                }
+
+                if (!adjacentToHall)
+                {
+                    if (_rng.NextDouble() < randomObjectSpawnChance)
+                    {
+                        if (trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
+                        {
+                            GenerateTrapAt(p, p, here);
+                        }
+                        else if (randomObjects.Length > 0)
+                        {
+                            GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
+                            Vector3 worldPos = MapPositionToWorld(p);
+                            
+                            Quaternion rot = Quaternion.Euler(0f, (float)_rng.NextDouble() * 360f, 0f);
+                            
+                            GameObject obj = Instantiate(objPrefab, OffsetWorldPositionWithinTile(worldPos), rot);
+                            
+                            obj.transform.parent = _mapParent.transform;
+                            obj.transform.name = $"RoomObject ({p.x},{p.z})";
+                            MapData[x, y, z].Element = MapElement.RoomWithObject;
+                        }
+                    }
+                }
+            }
+
+            
+            else if (here == MapElement.Hall)
+            {
+                if (trapPrefabs.Length > 0 && _rng.NextDouble() < trapInHallChance)
+                {
+                    GenerateTrapAt(p, p, here);
+                }
+            }
+       
+
+            TryPlaceDoorOnBoundary(p, Direction.North, y);
+            TryPlaceDoorOnBoundary(p, Direction.South, y);
+            TryPlaceDoorOnBoundary(p, Direction.East,  y);
+            TryPlaceDoorOnBoundary(p, Direction.West,  y);
+
+            TryPlaceWallOnEdge(p, Direction.North);
+            TryPlaceWallOnEdge(p, Direction.South);
+            TryPlaceWallOnEdge(p, Direction.East);
+            TryPlaceWallOnEdge(p, Direction.West);
+
         }
-   
-
-        TryPlaceDoorOnBoundary(p, Direction.North, y);
-        TryPlaceDoorOnBoundary(p, Direction.South, y);
-        TryPlaceDoorOnBoundary(p, Direction.East,  y);
-        TryPlaceDoorOnBoundary(p, Direction.West,  y);
-
-        TryPlaceWallOnEdge(p, Direction.North);
-        TryPlaceWallOnEdge(p, Direction.South);
-        TryPlaceWallOnEdge(p, Direction.East);
-        TryPlaceWallOnEdge(p, Direction.West);
-
     }
-}
+
+    private Vector3 OffsetWorldPositionWithinTile(Vector3 baseWorldPos, float inset = 1f)
+    {
+        float radius = (tileSize * 0.5f) - inset;
+        float offsetX = (float)(_rng.NextDouble() * 2.0 - 1.0) * radius;
+        float offsetZ = (float)(_rng.NextDouble() * 2.0 - 1.0) * radius;
+
+        return new Vector3(baseWorldPos.x + offsetX, baseWorldPos.y, baseWorldPos.z + offsetZ);
+    }
+
 
     private void GenerateTrapAt(Vector3Int p, Vector3Int position, MapElement element = MapElement.Room)
     {
-        // Spawn a trap
         GameObject trapPrefab = trapPrefabs[_rng.Next(trapPrefabs.Length)];
         Vector3 worldPosTrap = MapPositionToWorld(p);
-        GameObject trapObj = Instantiate(trapPrefab, worldPosTrap + new Vector3(0f, 0f, 0f), Quaternion.identity);
+        GameObject trapObj = Instantiate(trapPrefab, OffsetWorldPositionWithinTile(worldPosTrap), Quaternion.identity);
         trapObj.transform.parent = _mapParent.transform;
         trapObj.transform.name = $"RoomTrap ({p.x},{p.z})";
 
@@ -725,178 +870,168 @@ private void BuildWallsFromMap(int y)
             here = MapElement.RoomWithObject;
         }else if (element == MapElement.Hall)
         {
-            here = MapElement.Hall; // Halls with traps remain halls
+            here = MapElement.Hall; 
         }
         
-        // Mark cell as having an object
         MapData[position.x, position.y, position.z].Element = here;
     }
 
-private bool IsHall(MapElement e) => e == MapElement.Hall;
+    private bool IsHall(MapElement e) => e == MapElement.Hall;
 
-private bool IsRoomLike(MapElement e) =>
-    e == MapElement.Room || e == MapElement.RoomWithObject;
+    private bool IsRoomLike(MapElement e) =>
+        e == MapElement.Room || e == MapElement.RoomWithObject;
 
-private void TryPlaceDoorOnBoundary(Vector3Int floorCell, Direction edgeDir, int y)
-{
-    if (doorPrefabs == null || doorPrefabs.Length == 0) return;
-    if (_rng.NextDouble() > doorChance) return;
-
-    Vector3Int neighbor = floorCell + DirectionToOffset(edgeDir);
-    if (!InBounds(neighbor)) return;
-
-    MapElement a = MapData[floorCell.x, y, floorCell.z].Element;
-    MapElement b = MapData[neighbor.x, y, neighbor.z].Element;
-
-    bool boundary = (IsHall(a) && IsRoomLike(b)) || (IsRoomLike(a) && IsHall(b));
-    if (!boundary) return;
-
-    string edgeKey = MakeEdgeKey(floorCell, neighbor);
-    if (_spawnedDoorEdges.Contains(edgeKey)) return;
-
-    _spawnedDoorEdges.Add(edgeKey);
-    SpawnDoorForEdge(floorCell, edgeDir);
-}
-
-private void SpawnDoorForEdge(Vector3Int floorCell, Direction edgeDir)
-{
-    if (_doorsParent == null)
-        _doorsParent = new GameObject("Doors Container");
-
-    GameObject prefab = doorPrefabs[_rng.Next(doorPrefabs.Length)];
-    if (prefab == null) return;
-
-    Vector3 floorCenter = MapPositionToWorld(floorCell);
-    float half = tileSize * 0.5f;
-
-    Vector3 spawnPos = floorCenter;
-    Quaternion rot = Quaternion.identity;
-
-    switch (edgeDir)
+    private void TryPlaceDoorOnBoundary(Vector3Int floorCell, Direction edgeDir, int y)
     {
-        case Direction.North:
-            spawnPos += new Vector3(0f, wallVerticalOffset,  half);
-            rot = Quaternion.Euler(0f, 90f, 0f);
-            break;
+        if (doorPrefabs == null || doorPrefabs.Length == 0) return;
+        if (_rng.NextDouble() > doorChance) return;
 
-        case Direction.South:
-            spawnPos += new Vector3(0f, wallVerticalOffset, -half);
-            rot = Quaternion.Euler(0f, 90f, 0f);
-            break;
+        Vector3Int neighbor = floorCell + DirectionToOffset(edgeDir);
+        if (!InBounds(neighbor)) return;
 
-        case Direction.East:
-            spawnPos += new Vector3( half, wallVerticalOffset, 0f);
-            rot = Quaternion.Euler(0f, 0f, 0f);
-            break;
+        MapElement a = MapData[floorCell.x, y, floorCell.z].Element;
+        MapElement b = MapData[neighbor.x, y, neighbor.z].Element;
 
-        case Direction.West:
-            spawnPos += new Vector3(-half, wallVerticalOffset, 0f);
-            rot = Quaternion.Euler(0f, 0f, 0f);
-            break;
+        bool boundary = (IsHall(a) && IsRoomLike(b)) || (IsRoomLike(a) && IsHall(b));
+        if (!boundary) return;
 
-        default:
+        string edgeKey = MakeEdgeKey(floorCell, neighbor);
+        if (_spawnedDoorEdges.Contains(edgeKey)) return;
+
+        _spawnedDoorEdges.Add(edgeKey);
+        SpawnDoorForEdge(floorCell, edgeDir);
+    }
+
+    private void SpawnDoorForEdge(Vector3Int floorCell, Direction edgeDir)
+    {
+        if (_doorsParent == null)
+            _doorsParent = new GameObject("Doors Container");
+
+        GameObject prefab = doorPrefabs[_rng.Next(doorPrefabs.Length)];
+        if (prefab == null) return;
+
+        Vector3 floorCenter = MapPositionToWorld(floorCell);
+        float half = tileSize * 0.5f;
+
+        Vector3 spawnPos = floorCenter;
+        Quaternion rot = Quaternion.identity;
+
+        switch (edgeDir)
+        {
+            case Direction.North:
+                spawnPos += new Vector3(0f, wallVerticalOffset,  half);
+                rot = Quaternion.Euler(0f, 90f, 0f);
+                break;
+
+            case Direction.South:
+                spawnPos += new Vector3(0f, wallVerticalOffset, -half);
+                rot = Quaternion.Euler(0f, 90f, 0f);
+                break;
+
+            case Direction.East:
+                spawnPos += new Vector3( half, wallVerticalOffset, 0f);
+                rot = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            case Direction.West:
+                spawnPos += new Vector3(-half, wallVerticalOffset, 0f);
+                rot = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            default:
+                return;
+        }
+
+        GameObject door = Instantiate(prefab, spawnPos, rot);
+        door.transform.parent = _doorsParent.transform;
+        door.transform.name = $"Door_{edgeDir}_({floorCell.x},{floorCell.z})";
+    }
+
+
+    private void TryPlaceWallOnEdge(Vector3Int floorCell, Direction edgeDir)
+    {
+        Vector3Int neighbor = floorCell + DirectionToOffset(edgeDir);
+
+        bool neighborIsFloor =
+            InBounds(neighbor) &&
+            IsFloorLike(MapData[neighbor.x, neighbor.y, neighbor.z].Element);
+        
+        if (neighborIsFloor)
             return;
-    }
+        
+        string edgeKey = MakeEdgeKey(floorCell, neighbor);
 
-    GameObject door = Instantiate(prefab, spawnPos, rot);
-    door.transform.parent = _doorsParent.transform;
-    door.transform.name = $"Door_{edgeDir}_({floorCell.x},{floorCell.z})";
-}
-
-
-private void TryPlaceWallOnEdge(Vector3Int floorCell, Direction edgeDir)
-{
-    Vector3Int neighbor = floorCell + DirectionToOffset(edgeDir);
-
-    bool neighborIsFloor =
-        InBounds(neighbor) &&
-        IsFloorLike(MapData[neighbor.x, neighbor.y, neighbor.z].Element);
-
-    // If neighbor is floor-like, no wall between them
-    if (neighborIsFloor)
-        return;
-
-    // Dedupe key per *edge* so we never place the same edge twice
-    // Canonicalize by ordering the two cells (even if neighbor is out of bounds, it’s still fine)
-    string edgeKey = MakeEdgeKey(floorCell, neighbor);
-
-    if (_spawnedWallEdges.Contains(edgeKey))
-        return;
-
-    _spawnedWallEdges.Add(edgeKey);
-
-    SpawnWallForEdge(floorCell, edgeDir);
-}
-
-private string MakeEdgeKey(Vector3Int a, Vector3Int b)
-{
-    // Order-independent: smaller comes first
-    // Works fine even when b is out of bounds, since it still has coordinates.
-    if (CompareVec3Int(a, b) <= 0)
-        return $"{a.x},{a.y},{a.z}|{b.x},{b.y},{b.z}";
-    return $"{b.x},{b.y},{b.z}|{a.x},{a.y},{a.z}";
-}
-
-private int CompareVec3Int(Vector3Int a, Vector3Int b)
-{
-    if (a.x != b.x) return a.x.CompareTo(b.x);
-    if (a.y != b.y) return a.y.CompareTo(b.y);
-    return a.z.CompareTo(b.z);
-}
-
-private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
-{
-    Vector3 floorCenter = MapPositionToWorld(floorCell);
-    float half = tileSize * 0.5f;
-
-    if (wallPrefab == null) return;
-
-    GameObject prefab = wallPrefab;
-
-    bool variantWall = _rng.NextDouble() < variantWallChance;
-
-    if (variantWall && wallVariants.Length > 0)
-    {
-        prefab = wallVariants[_rng.Next(wallVariants.Length)];
-    }
-    
-    Vector3 spawnPos = floorCenter;
-    Quaternion rot = Quaternion.identity;
-
-    // Assumption:
-    // - wallPrefab's "default" orientation runs along X (left-right).
-    // - Therefore North/South edges need no rotation.
-    // - East/West edges need a 90° yaw.
-    switch (edgeDir)
-    {
-        case Direction.North:
-            spawnPos += new Vector3(0f, wallVerticalOffset,  half);
-            rot = Quaternion.Euler(0f, 90f, 0f);
-            break;
-
-        case Direction.South:
-            spawnPos += new Vector3(0f, wallVerticalOffset, -half);
-            rot = Quaternion.Euler(0f, 90f, 0f);
-            break;
-
-        case Direction.East:
-            spawnPos += new Vector3( half, wallVerticalOffset, 0f);
-            rot = Quaternion.Euler(0f, 0f, 0f);
-            break;
-
-        case Direction.West:
-            spawnPos += new Vector3(-half, wallVerticalOffset, 0f);
-            rot = Quaternion.Euler(0f, 0f, 0f);
-            break;
-
-        default:
+        if (_spawnedWallEdges.Contains(edgeKey))
             return;
+
+        _spawnedWallEdges.Add(edgeKey);
+
+        SpawnWallForEdge(floorCell, edgeDir);
     }
 
-    GameObject wall = Instantiate(prefab, spawnPos, rot);
-    wall.transform.parent = _wallsParent.transform;
-    wall.transform.name = $"Wall_{edgeDir}_({floorCell.x},{floorCell.z})";
-}
+    private string MakeEdgeKey(Vector3Int a, Vector3Int b)
+    {
+        if (CompareVec3Int(a, b) <= 0)
+            return $"{a.x},{a.y},{a.z}|{b.x},{b.y},{b.z}";
+        return $"{b.x},{b.y},{b.z}|{a.x},{a.y},{a.z}";
+    }
+
+    private int CompareVec3Int(Vector3Int a, Vector3Int b)
+    {
+        if (a.x != b.x) return a.x.CompareTo(b.x);
+        if (a.y != b.y) return a.y.CompareTo(b.y);
+        return a.z.CompareTo(b.z);
+    }
+
+    private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
+    {
+        Vector3 floorCenter = MapPositionToWorld(floorCell);
+        float half = tileSize * 0.5f;
+
+        if (wallPrefab == null) return;
+
+        GameObject prefab = wallPrefab;
+
+        bool variantWall = _rng.NextDouble() < variantWallChance;
+
+        if (variantWall && wallVariants.Length > 0)
+        {
+            prefab = wallVariants[_rng.Next(wallVariants.Length)];
+        }
+        
+        Vector3 spawnPos = floorCenter;
+        Quaternion rot = Quaternion.identity;
+        
+        switch (edgeDir)
+        {
+            case Direction.North:
+                spawnPos += new Vector3(0f, wallVerticalOffset,  half);
+                rot = Quaternion.Euler(0f, 90f, 0f);
+                break;
+
+            case Direction.South:
+                spawnPos += new Vector3(0f, wallVerticalOffset, -half);
+                rot = Quaternion.Euler(0f, 90f, 0f);
+                break;
+
+            case Direction.East:
+                spawnPos += new Vector3( half, wallVerticalOffset, 0f);
+                rot = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            case Direction.West:
+                spawnPos += new Vector3(-half, wallVerticalOffset, 0f);
+                rot = Quaternion.Euler(0f, 0f, 0f);
+                break;
+
+            default:
+                return;
+        }
+
+        GameObject wall = Instantiate(prefab, spawnPos, rot);
+        wall.transform.parent = _wallsParent.transform;
+        wall.transform.name = $"Wall_{edgeDir}_({floorCell.x},{floorCell.z})";
+    }
 
     public bool IsWalkableCell(Vector3Int cell)
     {
@@ -909,7 +1044,6 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
 
     public Vector3Int WorldToCell(Vector3 worldPos)
     {
-        // Assumes your tiles are aligned at multiples of tileSize and centered on MapPositionToWorld
         int x = Mathf.RoundToInt(worldPos.x / tileSize);
         int y = 0;
         int z = Mathf.RoundToInt(worldPos.z / tileSize);
@@ -952,8 +1086,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
 
         var corners = new[] { Corner.SW, Corner.NW, Corner.SE, Corner.NE };
         var failedCorners = new List<Corner>();
-
-        // First pass: try each corner
+        
         foreach (var corner in corners)
         {
             if (TryPickCornerNoteCell(corner, playerCell, minDist2, usedCells, out Vector3Int chosen))
@@ -966,14 +1099,13 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
                 failedCorners.Add(corner);
             }
         }
-
-        // Second pass: any failed corners get a global far-tile spawn
+        
         foreach (var corner in failedCorners)
         {
             if (TryPickAnyFarWalkableCell(playerCell, minDist2, usedCells, out Vector3Int chosen))
             {
                 usedCells.Add(chosen);
-                SpawnNoteAtCell(chosen, corner); // keep the name tag by corner for debugging
+                SpawnNoteAtCell(chosen, corner);
             }
             else
             {
@@ -1067,7 +1199,6 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
     {
         chosen = default;
 
-        // 1) Try the “9-square block” near the corner first (3x3 if radius=1)
         Vector3Int anchor = GetCornerAnchorCell(corner);
 
         Vector3Int best = default;
@@ -1087,8 +1218,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
             int dist2 = ddx * ddx + ddz * ddz;
 
             if (dist2 < minDist2) continue;
-
-            // Score = distance with a tiny jitter so it doesn’t always pick the same cell
+            
             int score = dist2 + _rng.Next(0, 25);
 
             if (!found || score > bestScore)
@@ -1104,8 +1234,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
             chosen = best;
             return true;
         }
-
-        // 2) Fallback: sample within that QUADRANT, still biased far from player
+        
         GetQuadrantBounds(corner, out int xMin, out int xMax, out int zMin, out int zMax);
 
         found = false;
@@ -1151,8 +1280,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
         int x1 = mapWidth - 1 - noteCornerInset;
         int z0 = noteCornerInset;
         int z1 = mapHeight - 1 - noteCornerInset;
-
-        // Clamp in case inset is too aggressive
+        
         x0 = Mathf.Clamp(x0, 0, mapWidth - 1);
         x1 = Mathf.Clamp(x1, 0, mapWidth - 1);
         z0 = Mathf.Clamp(z0, 0, mapHeight - 1);
@@ -1170,11 +1298,9 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
 
     private void GetQuadrantBounds(Corner corner, out int xMin, out int xMax, out int zMin, out int zMax)
     {
-        // Split the map in half for quadrants
         int midX = mapWidth / 2;
         int midZ = mapHeight / 2;
-
-        // Ensure bounds are valid inclusive ranges
+        
         switch (corner)
         {
             case Corner.SW:
@@ -1213,18 +1339,15 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
 
         bool found = false;
         Vector3Int chosen = default;
-
-        // Try random sampling first (fast)
+        
         for (int i = 0; i < enemySpawnAttempts; i++)
         {
-            // Bias toward rooms, but allow halls too
             bool pickRoom = _roomCells.Count > 0 && _rng.NextDouble() < 0.7;
             var list = pickRoom ? _roomCells : _hallCells;
             if (list.Count == 0) continue;
 
             Vector3Int cell = list[_rng.Next(list.Count)];
-
-            // Must be currently walkable (excludes RoomWithObject)
+            
             if (!IsWalkableCell(cell)) continue;
 
             int dx = cell.x - playerCell.x;

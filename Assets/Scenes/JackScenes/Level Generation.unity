@@ -225,10 +225,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
-      propertyPath: randomObjects.Array.size
-      value: 13
-      objectReference: {fileID: 0}
-    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
       propertyPath: 'randomObjects.Array.data[13]'
       value: 
       objectReference: {fileID: 1208074685239165335, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
