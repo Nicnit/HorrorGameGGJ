@@ -131,6 +131,8 @@ public class PlayerController : MonoBehaviour
         }
 
         rb.linearVelocity = new Vector3(desiredVelocity.x, rb.linearVelocity.y, desiredVelocity.z);
+
+        AudioManager.Instance.PlayerIsMoving = rb.linearVelocity.magnitude > 1f;
     }
 
     private void Jump()
