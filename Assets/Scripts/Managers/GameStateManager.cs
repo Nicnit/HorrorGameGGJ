@@ -32,6 +32,10 @@ public class GameStateManager : MonoBehaviour
         monsterSlashEffect = GameObject.Find("MonsterSlashEffect");
         if (monsterSlashEffect != null)
             slashAnimator = monsterSlashEffect.GetComponent<Animator>();
+        
+        
+        Application.targetFrameRate = 60; 
+        QualitySettings.vSyncCount = 1;
     }
 
 
