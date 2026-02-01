@@ -74,6 +74,12 @@ MonoBehaviour:
   ceilingVariants:
   - {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
   - {fileID: 405572304276984119, guid: 86371f8f8e176454aa856a08a8b89a21, type: 3}
+  floorVariants:
+  - {fileID: 405572304276984119, guid: 8b11cabf52d991543a108b240728b2f6, type: 3}
+  - {fileID: 405572304276984119, guid: 56ac96cad35d1fa449dce97c8dc31446, type: 3}
+  - {fileID: 405572304276984119, guid: c0223a91d58f25d4f86648352e300b46, type: 3}
+  - {fileID: 405572304276984119, guid: 88d2978e2bc494f4ba6f578f0ed25599, type: 3}
+  - {fileID: 405572304276984119, guid: c673ae6e89c9e624ab5792de6274f3af, type: 3}
   doorPrefabs:
   - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
   - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
@@ -98,6 +104,7 @@ MonoBehaviour:
   roomHeightRange: {x: 3, y: 7}
   roomPlacementAttempts: 200
   variantWallChance: 0.15
+  variantFloorChance: 0.2
   verboseLogs: 0
 --- !u!114 &2590576812106161266
 MonoBehaviour:

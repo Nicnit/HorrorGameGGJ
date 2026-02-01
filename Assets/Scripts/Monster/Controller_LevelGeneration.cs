@@ -18,6 +18,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     //Variation Pieces
     [SerializeField] private GameObject[] wallVariants;
     [SerializeField] private GameObject[] ceilingVariants;
+    [SerializeField] private GameObject[] floorVariants;
     
     [Header("Doors")]
     [SerializeField] private GameObject[] doorPrefabs;
@@ -58,6 +59,7 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private Vector2Int roomHeightRange = new Vector2Int(3, 7);
     [SerializeField] private int roomPlacementAttempts = 200;
     [SerializeField] private float variantWallChance = 0.3f;
+    [SerializeField] private float variantFloorChance = 0.3f;
     
 
     [Header("Debug")]
@@ -245,6 +247,15 @@ public class Controller_LevelGeneration : MonoBehaviour
 
         if (element == MapElement.Grass)
             prefab = grassPrefab;
+        
+        if (element == MapElement.Hall || element == MapElement.Room)
+        {
+            // Chance to use a variant floor
+            if (_rng.NextDouble() < variantFloorChance && floorVariants.Length > 0)
+            {
+                prefab = floorVariants[_rng.Next(floorVariants.Length)];
+            }
+        }
 
         Vector3 worldPos = MapPositionToWorld(position);
         GameObject tile = Instantiate(prefab, worldPos, Quaternion.identity);
