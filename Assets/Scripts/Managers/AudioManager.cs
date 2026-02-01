@@ -25,6 +25,7 @@ public enum E_SoundEffect
     DoorOpen,
     PlayerFootstep,
     Note,
+    Trap,
 }
 
 public class AudioManager : MonoBehaviour
@@ -47,6 +48,7 @@ public class AudioManager : MonoBehaviour
     public AudioSource DoorOpen;
     public AudioSource PlayerFootstep;
     public AudioSource Note;
+    public AudioSource Trap;
 
 
     [Header("Background Reference")]
@@ -172,6 +174,9 @@ public class AudioManager : MonoBehaviour
             case E_SoundEffect.DoorOpen:
                 DoorOpen.Play();
                 break;
+            case E_SoundEffect.Trap:
+                Trap.Play();
+                break;
         }
     }
     public void PlaySoundEffect(string soundEffect)
@@ -187,6 +192,9 @@ public class AudioManager : MonoBehaviour
                 break;
             case E_SoundEffect.DoorOpen:
                 DoorOpen.Play();
+                break;
+            case E_SoundEffect.Trap:
+                Trap.Play();
                 break;
         }
     }
@@ -204,6 +212,9 @@ public class AudioManager : MonoBehaviour
                 break;
             case E_SoundEffect.DoorOpen:
                 DoorOpen.Stop();
+                break;
+            case E_SoundEffect.Trap:
+                Trap.Stop();
                 break;
         }
     }

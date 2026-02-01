@@ -64,16 +64,10 @@ MonoBehaviour:
   - {fileID: 8081646803540556620, guid: 28a11465e63187b4aa59d293067fd745, type: 3}
   trapPrefabs:
   - {fileID: 2605676774829917753, guid: c69acafee7cc14fb8b7e936434ca7299, type: 3}
-<<<<<<< HEAD
   - {fileID: 1208074685239165335, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
   randomObjectSpawnChance: 0.4
   trapInHallChance: 1
   randomObjectTrapChance: 0.3
-=======
-  randomObjectSpawnChance: 0.3
-  trapInHallChance: 0.1
-  randomObjectTrapChance: 0.25
->>>>>>> cdb90d2 (winstate)
   playerPrefab: {fileID: 6705697775075807597, guid: 7d1c00746275844458465bd6cdadb08a, type: 3}
   worldLightPrefab: {fileID: 8096542298612641285, guid: 4d53a4540024e5047af40158f980bc7c, type: 3}
   wallVariants:
