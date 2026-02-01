@@ -1,4 +1,6 @@
+using System.Collections;
 using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -7,6 +9,7 @@ public class NoteUI : MonoBehaviour
 {
     public GameObject noteObject;
     protected InputAction isInteracting;
+    public bool isReaded = false;
 
     protected void Awake()
     {
@@ -20,12 +23,29 @@ public class NoteUI : MonoBehaviour
         // Also if no other UI is showing
         if (isInteracting != null && isInteracting.triggered) // TODO check if MAIN UI is activated via UI manager
         {
-            noteObject.SetActive(false);
+            //
+            //
         }
     }
 
-    public void ShowNote(string noteText) {
+    public void ShowNote() {
         noteObject.SetActive(true);
-        noteObject.GetComponentInChildren<TMP_Text>().SetText(noteText);
+        PlayerController pc = FindFirstObjectByType<PlayerController>();
+        
+        noteObject.GetComponentInChildren<TextMeshProUGUI>().SetText(pc.NoteList[pc.CurrentNote]);
+        pc.CurrentNote++;
+
+        NoticeUI notice = FindFirstObjectByType<NoticeUI>();
+        notice.ToggleNotice(false, "");
+
+        StartCoroutine(WaitForInteract());
+    }
+
+    private IEnumerator WaitForInteract()
+    {
+        yield return new WaitForSeconds(1f);
+        yield return new WaitUntil(() => isInteracting.triggered);
+
+        noteObject.SetActive(false);
     }
 }
