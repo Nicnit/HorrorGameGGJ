@@ -183,6 +183,8 @@ public class PlayerController : MonoBehaviour
 
     public void StunLock(float newStunTime)
     {
+        Debug.Log("Stunned");
+        
         float stunTimeLeft = maxStunTime - stunTime;
         if (stunTimeLeft < newStunTime)
         {

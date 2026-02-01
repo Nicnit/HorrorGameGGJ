@@ -5,29 +5,39 @@ using UnityEngine.InputSystem;
 
 public abstract class BaseTrap : MonoBehaviour
 {
-    protected GameObject player;
+    [SerializeField] protected MeshRenderer trapVFX;
+    [SerializeField] protected GameObject player;
     protected PlayerController playerController;
+    [SerializeField] protected MaskManager maskManager;
+    [SerializeField] protected AudioManager audioManager;
+    [SerializeField] protected AudioClip sfxTrap;
 
     protected virtual void Start()
     {
-        player = GameObject.FindWithTag("Player");
+        if (player == null)
+            player = GameObject.FindGameObjectWithTag("Player");
         playerController = player.GetComponent<PlayerController>();
     }
 
+    // If mask set on, show traps
+    // If mask set off, hide traps
+    protected void Update()
+    {
+        trapVFX.enabled = maskManager.IsMaskOn;
+    }
+    
+
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals("Player"))
+        Debug.Log("Trigger Enter");
+        if (other.gameObject.tag.Equals("Player"))
         {
-            DoTrapEffect(other.gameObject);
+            DoTrapEffect();
         }
     }
 
-    protected virtual void DoTrapEffect(GameObject player)
+    protected virtual void DoTrapEffect()
     {
-        // Default Behavior here
+        
     }
-    
-    
-    
-    
 }

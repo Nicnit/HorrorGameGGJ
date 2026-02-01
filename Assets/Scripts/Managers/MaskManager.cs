@@ -1,6 +1,8 @@
 using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class MaskManager : MonoBehaviour
 {
@@ -15,27 +17,41 @@ public class MaskManager : MonoBehaviour
         Amp Up Monster Aggression and Speed
     */
     
-    [SerializeField] private GameObject vignetteVFX;
+    [SerializeField] private Image vignetteVFX;
+    [Tooltip("Canvas objects that represent the mask when worn")]
+    [SerializeField] private Image maskVFX;
+    
+    // TODO can replace this with animaiton state machine, only user normal maskvfx
+    [Tooltip("Canvas objects that represent the mask when being taken off / put on")]
+    [SerializeField] private GameObject maskTransitionVFX;
+    
+    [Tooltip("Match to time of animation if animation available")]
     [SerializeField] private float maskPutOnTimer;
     [SerializeField] private float maskTakeOffTimer;
 
     private InputAction toggleMaskAction;
     private bool maskOn;
+    public bool IsMaskOn => maskOn;
     private bool changingMaskState = false;
+    private bool isPuttingOn = false; // Track direction to decouple from maskOn state
     
     private void Start()
     {
-        toggleMaskAction = InputSystem.actions.FindAction("ToggleMask");
+        toggleMaskAction = InputSystem.actions.FindAction("ToggleMask"); // ToggleMask
+        toggleMaskAction.Enable();
+        maskVFX.enabled = false;
+        maskTransitionVFX.SetActive(false);
+        SetVignette(false);
     }
 
 
     private void Update()
     {
         // When mask put on/off, override current animation / cooldown and replace
-
+        
         if (changingMaskState) // Update timers
         {
-            if (maskOn)
+            if (!isPuttingOn)
                 TakeOffMask();
             else
                 PutOnMask();
@@ -52,12 +68,20 @@ public class MaskManager : MonoBehaviour
         if (newMaskState)
         {
             curTimer = 0f;
+            changingMaskState = true;
+            maskTransitionVFX.SetActive(true);
+            isPuttingOn = true;
             // TODO put on mask animation here
             PutOnMask();
         }
         else
         {
+            SetMaskOff(); 
+            
             curTimer = 0f;
+            maskTransitionVFX.SetActive(true); // Reenable because SetMaskOff disabled it
+            changingMaskState = true;
+            isPuttingOn = false;
             // TODO take off mask animation here
             TakeOffMask();
         }
@@ -68,43 +92,36 @@ public class MaskManager : MonoBehaviour
 
     public void PutOnMask()
     {
-        if (maskOn)
-        {
-            changingMaskState = false;
-            return;
-        }
-        
-        // Handle Timer until Animation finishes
+        // Handle timer until anim finishes
         if (curTimer < maskPutOnTimer)
         {
             curTimer += Time.deltaTime;
             return;
         }
-        
+
+        changingMaskState = false;
         SetMaskOn();
     }
 
     public void TakeOffMask()
     {
-        if (!maskOn)
-        {
-            changingMaskState = false;
-            return;
-        }
-        
-        // Handle Timer until Animation finishes
+        // Handle timer until anim finishes
         if (curTimer < maskTakeOffTimer)
         {
             curTimer += Time.deltaTime;
             return;
         }
         
-        SetMaskOff();
+        changingMaskState = false;
+        maskTransitionVFX.SetActive(false);
     }
 
     private void SetMaskOn()
     {
         maskOn = true;
+        maskVFX.enabled = true;
+        maskTransitionVFX.SetActive(false);
+        Debug.Log("SetMaskOn");
         
         // Mask is officially on, effects start immediately
         
@@ -124,6 +141,9 @@ public class MaskManager : MonoBehaviour
     private void SetMaskOff()
     {
         maskOn = false;
+        maskVFX.enabled = false;
+        maskTransitionVFX.SetActive(false);
+        Debug.Log("SetMaskOff");
         
         // Mask is officially off, effects start immediately
         
@@ -145,7 +165,7 @@ public class MaskManager : MonoBehaviour
     {
         // For now just turn on static/animated vignette
         // Disable on taking off mask. Layer Vignette behind UI
-        vignetteVFX.SetActive(setOn);
+        vignetteVFX.enabled = setOn;
     }
     
     
