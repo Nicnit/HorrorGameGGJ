@@ -35,7 +35,8 @@ public class GridDistanceField : MonoBehaviour
     {
         if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
         if (gen == null) gen = FindFirstObjectByType<Controller_LevelGeneration>();
-        if (gen == null || gen.MapData == null) return;
+        if (gen == null || gen.MapData == null || player == null) return;
+            
 
         TryAllocate();
         if (_playerDist == null) return;
