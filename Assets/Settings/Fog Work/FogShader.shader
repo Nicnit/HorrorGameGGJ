@@ -10,12 +10,15 @@ Shader "Tutorial/VolumetricFog_Stark"
         _DensityMultiplier("Noise Multiplier", Range(0, 10)) = 1
         
         _NoiseOffset("Noise offset", float) = 0
-        _FogNoise("Fog noise", 3D) = "white" {}
+        _FogNoise("Fog noise", 3D) = "" {}
         _NoiseTiling("Noise tiling", float) = 1
         _DensityThreshold("Density threshold", Range(0, 1)) = 0.1
         
         [HDR]_LightContribution("Light contribution", Color) = (1, 1, 1, 1)
         _LightScattering("Light scattering", Range(0, 1)) = 0.2
+        
+        // Toggling fog on/ off mostly
+        _Intensity("Master Intensity", Range(0, 1)) = 1
     }
 
     SubShader
@@ -46,6 +49,7 @@ Shader "Tutorial/VolumetricFog_Stark"
             float _NoiseTiling;
             float4 _LightContribution;
             float _LightScattering;
+            float _Intensity;
 
             float henyey_greenstein(float angle, float scattering)
             {
@@ -66,6 +70,10 @@ Shader "Tutorial/VolumetricFog_Stark"
             half4 frag(Varyings IN) : SV_Target
             {
                 float4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp, IN.texcoord);
+                
+                if (_Intensity < 0.01) // If fog is toggled off
+                    return col;
+                
                 float depth = SampleSceneDepth(IN.texcoord);
                 float3 worldPos = ComputeWorldSpacePosition(IN.texcoord, depth, UNITY_MATRIX_I_VP);
 

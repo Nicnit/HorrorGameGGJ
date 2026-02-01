@@ -34,8 +34,9 @@ Material:
     m_Ints: []
     m_Floats:
     - _BaseDensity: 0.4
-    - _DensityMultiplier: 0.3
+    - _DensityMultiplier: 0.28
     - _DensityThreshold: 0.95
+    - _Intensity: 0
     - _LightScattering: 0.2
     - _MaxDistance: 40
     - _NoiseOffset: 2

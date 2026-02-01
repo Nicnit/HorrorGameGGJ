@@ -1,7 +1,9 @@
 using System;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public class MaskManager : MonoBehaviour
@@ -28,7 +30,11 @@ public class MaskManager : MonoBehaviour
     [Tooltip("Match to time of animation if animation available")]
     [SerializeField] private float maskPutOnTimer;
     [SerializeField] private float maskTakeOffTimer;
-
+    
+    // Toggling fog
+    [SerializeField] private Material fogMat;
+    private static readonly int IntensityID = Shader.PropertyToID("_Intensity");
+    
     private InputAction toggleMaskAction;
     private bool maskOn;
     public bool IsMaskOn => maskOn;
@@ -42,6 +48,10 @@ public class MaskManager : MonoBehaviour
         maskVFX.enabled = false;
         maskTransitionVFX.SetActive(false);
         SetVignette(false);
+        //if (pcRendererData != null)
+          //  fogRendererFeature = pcRendererData.GetComponent<FullScreenPassRendererFeature>();
+        //fogRendererFeature.SetActive(false);
+        SetFogLevel(0);
     }
 
 
@@ -131,10 +141,11 @@ public class MaskManager : MonoBehaviour
         
         // TODO Agrro set high monster aggro
         
-        // TODO Activate Fog
-        
+        // Activate Fog
+        SetFogLevel(1);
+
         // Shows traps via IsMaskOn
-        
+
         // Additional SFX / VFX
     }
     
@@ -154,7 +165,8 @@ public class MaskManager : MonoBehaviour
         
         // TODO Aggro change Monster Aggro
         
-        // TODO Activate Fog
+        // Activate Fog
+        SetFogLevel(0);
         
         // Hides traps via IsMaskOn 
         
@@ -167,6 +179,11 @@ public class MaskManager : MonoBehaviour
         // For now just turn on static/animated vignette
         // Disable on taking off mask. Layer Vignette behind UI
         vignetteVFX.enabled = setOn;
+    }
+
+    private void SetFogLevel(float val)
+    {
+        fogMat.SetFloat(IntensityID, val);
     }
     
     

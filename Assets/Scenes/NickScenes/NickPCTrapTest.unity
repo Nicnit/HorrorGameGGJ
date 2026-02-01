@@ -867,6 +867,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: MaskCollective
       objectReference: {fileID: 0}
+    - target: {fileID: 2686118558002806991, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
+      propertyPath: fogMat
+      value: 
+      objectReference: {fileID: 2100000, guid: 790a2029687b34acba416b0793a98e3d, type: 2}
+    - target: {fileID: 2686118558002806991, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
+      propertyPath: pcRendererData
+      value: 
+      objectReference: {fileID: 11400000, guid: f288ae1f4751b564a96ac7587541f7a2, type: 2}
     - target: {fileID: 6021573238903407026, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
