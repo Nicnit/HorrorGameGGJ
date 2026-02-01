@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxStamina = 5f;
     [SerializeField] private float degenRate = 3f;
     [SerializeField] private float regenRate = 0.5f;
+    [SerializeField] private float trapEffectiveness = 0.5f;    // 1 is immediate stopping 
 
     [Header("Wall Slide")]
     [SerializeField, Tooltip("How 'wall-like' a surface must be. Lower = more likely to count as wall.")]
@@ -62,13 +63,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        bool stunned = stunTime < maxStunTime;
-        if (stunned)
-        {
-            stunTime += Time.deltaTime;
-            return;
-        }
-
         inputDir = moveAction.ReadValue<Vector2>();
         UpdateGround();
 
@@ -85,6 +79,15 @@ public class PlayerController : MonoBehaviour
         bestWallNormal = Vector3.zero;
         bestWallOpposition = 0f;
 
+        bool stunned = stunTime < maxStunTime;
+        if (stunned)
+        {
+            // Restrict / Disable movement not just input
+            rb.linearVelocity -= rb.linearVelocity * (trapEffectiveness * Time.fixedDeltaTime);
+            stunTime += Time.fixedDeltaTime;
+            return;
+        }
+        
         Move();
         Jump();
     }
@@ -191,6 +194,16 @@ public class PlayerController : MonoBehaviour
             maxStunTime = newStunTime;
             stunTime = 0f;
         }
+    }
+
+    public bool isOnGround()
+    {
+        return isGrounded;
+    }
+
+    public bool isInSprint()
+    {
+        return isSprinting;
     }
 
 #if UNITY_EDITOR

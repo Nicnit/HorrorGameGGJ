@@ -127,13 +127,13 @@ public class MaskManager : MonoBehaviour
         
         // Enable Vignette
         SetVignette(false);
-        // TODO Enhance Monster Audio
+        // TODO SFX Enhance Monster Audio SFX
         
-        // TODO Set Monster Aggro
+        // TODO Agrro set high monster aggro
         
         // TODO Activate Fog
         
-        // TODO Show traps
+        // Shows traps via IsMaskOn
         
         // Additional SFX / VFX
     }
@@ -149,13 +149,14 @@ public class MaskManager : MonoBehaviour
         
         // Enable Vignette
         SetVignette(true);
-        // Enhance Monster Audio
         
-        // Set Monster Aggro
+        // TODO SFX change Monster Audio
         
-        // Activate Fog
+        // TODO Aggro change Monster Aggro
         
-        // Show traps
+        // TODO Activate Fog
+        
+        // Hides traps via IsMaskOn 
         
         // Additional SFX / VFX
     }
