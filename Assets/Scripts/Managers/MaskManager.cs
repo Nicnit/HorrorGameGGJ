@@ -25,7 +25,7 @@ public class MaskManager : MonoBehaviour
     [Tooltip("If true, uses aggroDurationPutting as max")]
     [SerializeField] private bool randomizeAggroDuration;
     [SerializeField] private float minAggroDuration;
-    [SerializeField] private float maskOffAggroDuration; // Sets Aggro for randomly 
+    [SerializeField] private float timeWithoutMaskUntilAggro; // Sets Aggro for randomly 
     
     [Tooltip("Match to time of animation if animation available")]
     [SerializeField] private float maskPutOnTimer;
@@ -52,6 +52,7 @@ public class MaskManager : MonoBehaviour
     }
 
 
+    private float maskOffTime;
     private void Update()
     {
         // When mask put on/off, override current animation / cooldown and replace
@@ -67,6 +68,16 @@ public class MaskManager : MonoBehaviour
         bool toggleMask = toggleMaskAction.triggered;
         if (toggleMask)
             OnMaskTrigger();
+
+        if (!IsMaskOn)
+        {
+            maskOffTime += Time.deltaTime;
+            if (maskOffTime > timeWithoutMaskUntilAggro)
+            {
+                maskOffTime = 0;
+                SetAggroDuration();
+            }
+        }
     }
 
     private void OnMaskTrigger()
@@ -131,7 +142,6 @@ public class MaskManager : MonoBehaviour
         // TODO SFX Enhance Monster Audio SFX
         
         // Aggro set high monster aggro
-        // TODO aggro decay upon disable?
         SetMonsterAggro();
         
         // Activate Fog
@@ -180,11 +190,9 @@ public class MaskManager : MonoBehaviour
         float duration = randomizeAggroDuration ? 
             Random.Range(minAggroDuration, aggroDurationPuttingMaskOn) :  aggroDurationPuttingMaskOn;
         // Make monster chase. After toggling off,continues chasing until timer runs out. in meantime pauses that timer.
-        GridChaser.Instance?.ToggleAggroOverride(true, true);
+        GridChaser.Instance?.Aggro(duration);
     }
     
     
     // If long enough without mask, Aggro monster?
-    
-    
 }
