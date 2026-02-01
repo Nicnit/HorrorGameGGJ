@@ -10,7 +10,7 @@ public class MainMenu : MonoBehaviour
     }
     public void PlayGame()
     {
-        SceneManager.LoadScene("Level Generation");
+        SceneManager.LoadScene("Gameplay Scene");
         Time.timeScale = 1f;
     }
 

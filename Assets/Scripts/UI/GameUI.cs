@@ -34,7 +34,7 @@ public class GameUI : MonoBehaviour
     }
 
     public void Exit() {
-        SceneManager.LoadScene("Level Generation");
+        SceneManager.LoadScene("Gameplay Scene");
     }
 
     public void MaskOn() {
