@@ -63,7 +63,7 @@ MonoBehaviour:
   - {fileID: 2017405188502108377, guid: 369bbd0d527ca1a45935eb887f68549d, type: 3}
   - {fileID: 8081646803540556620, guid: 28a11465e63187b4aa59d293067fd745, type: 3}
   trapPrefabs:
-  - {fileID: 2605676774829917753, guid: c69acafee7cc14fb8b7e936434ca7299, type: 3}
+  - {fileID: 2605676774829917753, guid: c76f84180a1c7c043818db60e3f8a032, type: 3}
   - {fileID: 1208074685239165335, guid: 62ddff062be9c4711bd9a05c1b7dba1f, type: 3}
   randomObjectSpawnChance: 0.3
   trapInHallChance: 0.1
