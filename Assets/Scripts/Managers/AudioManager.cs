@@ -13,6 +13,15 @@ public enum E_BackGroundMusic
 public enum E_SoundEffect
 {
     ButtonPressed,
+    MonsterCloseBy,
+    MonsterFootstep,
+    MonsterGrowling,
+    MaskOn,
+    MaskOff,
+    AmbientNoise1,
+    AmbientNoise2,
+    DoorOpen,
+    PlayerFootstep,
 }
 
 public class AudioManager : MonoBehaviour
@@ -25,6 +34,16 @@ public class AudioManager : MonoBehaviour
 
     [Header("Sound Effect Reference")]
     public AudioSource ButtonPressed;
+    public AudioSource MonsterCloseBy;
+    public AudioSource MonsterFootstep;
+    public AudioSource MonsterGrowling;
+    public AudioSource MaskOn;
+    public AudioSource MaskOff;
+    public AudioSource AmbientNoise1;
+    public AudioSource AmbientNoise2;
+    public AudioSource DoorOpen;
+    public AudioSource PlayerFootstep;
+
 
     [Header("Background Reference")]
     public AudioSource MainMenu;
