@@ -6,22 +6,20 @@ using Update = Unity.VisualScripting.Update;
 public class InteractableNote : BaseInteractable
 {
     private bool canShowNote = false;
-    [SerializeField] private GameObject noteVFX;
 
     protected override void Update()
     {
         base.Update();
         
         // Turn off the Notepaper if it isn't allowed to be seen
-        if (!canShowNote && noteVFX.activeInHierarchy)
+        if (!canShowNote && onInteractVFX.activeInHierarchy)
         {
-            noteVFX.SetActive(false);
+            onInteractVFX.SetActive(false);
             Debug.Log("Cant show note");
         }
     }
     
-    
-    
+     
     protected override void OnInteractionTrigger()
     {
         // update progress manager to include this note as done/read
@@ -29,14 +27,14 @@ public class InteractableNote : BaseInteractable
         
         // Show Note UI
         canShowNote = !canShowNote;
-        noteVFX.SetActive(true);
+        DisplayObject();
         
         // Do note sound effect
         // ReadSFX();
         
         Debug.Log("Did interaction trigger");
         Debug.Log("Can show note: " + canShowNote);
-        Debug.Log(noteVFX.activeInHierarchy);
+        Debug.Log(onInteractVFX.activeInHierarchy);
     }
     
     private void ReadSFX()

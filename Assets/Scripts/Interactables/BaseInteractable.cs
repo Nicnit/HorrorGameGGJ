@@ -9,6 +9,7 @@ public abstract class BaseInteractable : MonoBehaviour
     public bool IsFinished() => isFinished;
     [SerializeField] protected GameObject noticePopup;
     [SerializeField] protected float interactDistance;
+    [SerializeField] protected GameObject onInteractVFX;
  
     protected GameObject player;
     protected InputAction isInteracting;
@@ -45,7 +46,6 @@ public abstract class BaseInteractable : MonoBehaviour
         }
     }
     
-    
     protected virtual void ShowUINotice()
     {
         noticePopup.SetActive(true);
@@ -56,6 +56,10 @@ public abstract class BaseInteractable : MonoBehaviour
         noticePopup.SetActive(false);
     }
 
+    protected virtual void DisplayObject()
+    {
+        onInteractVFX.SetActive(true);
+    }
 
     /// <summary>
     /// When player performs interaction
