@@ -55,8 +55,6 @@ public abstract class BaseInteractable : MonoBehaviour
     }
 
     protected virtual void ToggleUINotice(bool show) {
-        Debug.Log("Trying to show");
-        Debug.Log(show);
         NoticeUI notice = FindFirstObjectByType<NoticeUI>();
         notice.ToggleNotice(show, InteractableText);
     }

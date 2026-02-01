@@ -27,14 +27,6 @@ public class MaskManager : MonoBehaviour
     [SerializeField] private float minAggroDuration;
     [SerializeField] private float maskOffAggroDuration; // Sets Aggro for randomly 
     
-    [SerializeField] private Image vignetteVFX;
-    [Tooltip("Canvas objects that represent the mask when worn")]
-    [SerializeField] private Image maskVFX;
-    
-    // TODO can replace this with animaiton state machine, only user normal maskvfx
-    [Tooltip("Canvas objects that represent the mask when being taken off / put on")]
-    [SerializeField] private GameObject maskTransitionVFX;
-    
     [Tooltip("Match to time of animation if animation available")]
     [SerializeField] private float maskPutOnTimer;
     [SerializeField] private float maskTakeOffTimer;
@@ -53,9 +45,6 @@ public class MaskManager : MonoBehaviour
     {
         toggleMaskAction = InputSystem.actions.FindAction("ToggleMask"); // ToggleMask
         toggleMaskAction.Enable();
-        maskVFX.enabled = false;
-        maskTransitionVFX.SetActive(false);
-        SetVignette(false);
         //if (pcRendererData != null)
           //  fogRendererFeature = pcRendererData.GetComponent<FullScreenPassRendererFeature>();
         //fogRendererFeature.SetActive(false);
@@ -82,14 +71,14 @@ public class MaskManager : MonoBehaviour
 
     private void OnMaskTrigger()
     {
+        GameUI gameui = FindFirstObjectByType<GameUI>();
         bool newMaskState = !maskOn;
         if (newMaskState)
         {
             curTimer = 0f;
             changingMaskState = true;
-            maskTransitionVFX.SetActive(true);
-            isPuttingOn = true;
-            // TODO put on mask animation here
+            isPuttingOn = true;      
+            gameui.MaskOn();
             PutOnMask();
         }
         else
@@ -97,10 +86,9 @@ public class MaskManager : MonoBehaviour
             SetMaskOff(); 
             
             curTimer = 0f;
-            maskTransitionVFX.SetActive(true); // Reenable because SetMaskOff disabled it
             changingMaskState = true;
             isPuttingOn = false;
-            // TODO take off mask animation here
+            gameui.MaskOff();
             TakeOffMask();
         }
     }
@@ -131,20 +119,15 @@ public class MaskManager : MonoBehaviour
         }
         
         changingMaskState = false;
-        maskTransitionVFX.SetActive(false);
     }
 
     private void SetMaskOn()
     {
         maskOn = true;
-        maskVFX.enabled = true;
-        maskTransitionVFX.SetActive(false);
         Debug.Log("SetMaskOn");
         
         // Mask is officially on, effects start immediately
         
-        // Enable Vignette
-        SetVignette(false);
         // TODO SFX Enhance Monster Audio SFX
         
         // Aggro set high monster aggro
@@ -162,14 +145,10 @@ public class MaskManager : MonoBehaviour
     private void SetMaskOff()
     {
         maskOn = false;
-        maskVFX.enabled = false;
-        maskTransitionVFX.SetActive(false);
         Debug.Log("SetMaskOff");
         
         // Mask is officially off, effects start immediately
         
-        // Enable Vignette
-        SetVignette(true);
         
         // TODO SFX change Monster Audio
         
@@ -189,13 +168,6 @@ public class MaskManager : MonoBehaviour
     {
         // TODO keep aggro decay after mask off? Accumulates aggro from traps over time
         GridChaser.Instance?.ToggleAggroOverride(maskOn, true);
-    }
-
-    private void SetVignette(bool setOn)
-    {
-        // For now just turn on static/animated vignette
-        // Disable on taking off mask. Layer Vignette behind UI
-        vignetteVFX.enabled = setOn;
     }
 
     private void SetFogLevel(float val)

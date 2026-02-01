@@ -6,6 +6,8 @@ public class GameUI : MonoBehaviour
 {
     public GameObject pauseMenu;
     private bool isPaused = false;
+    public Animator Mask;
+    public bool isMaskOn = false;
 
     // Update is called once per frame
     void Update()
@@ -37,6 +39,13 @@ public class GameUI : MonoBehaviour
         Debug.Log("Pressed");
         SceneManager.LoadScene("MainMenu");
     }
-    
-    
+
+    public void MaskOn() {
+        Mask.Play("Mask On");
+    }
+
+    public void MaskOff()
+    {
+        Mask.Play("Mask Off");
+    }
 }
