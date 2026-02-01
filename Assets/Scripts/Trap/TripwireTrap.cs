@@ -12,10 +12,11 @@ public class TripwireTrap : BaseTrap
         
         //Stunlock VFX
         // TODO tripwire trap VFX
-        // TODO tripwire trap SFX
         
         // Aggro the monster
         // TODO requires monster
+        
+        // TODO destroy 
         
     }
 }

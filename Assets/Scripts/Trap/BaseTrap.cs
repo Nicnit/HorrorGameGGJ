@@ -36,6 +36,6 @@ public abstract class BaseTrap : MonoBehaviour
 
     protected virtual void DoTrapEffect()
     {
-        
+        // TODO (if doing one SFX for all traps) traps SFX
     }
 }
