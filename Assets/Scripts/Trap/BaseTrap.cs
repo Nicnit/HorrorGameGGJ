@@ -5,10 +5,12 @@ using UnityEngine.InputSystem;
 
 public abstract class BaseTrap : MonoBehaviour
 {
+    [SerializeField] protected float aggressionDuration;
     [SerializeField] protected MeshRenderer trapVFX;
     [SerializeField] protected GameObject player;
     protected PlayerController playerController;
     [SerializeField] protected MaskManager maskManager;
+    [SerializeField] protected bool selfDestructs = true;
 
     protected virtual void Start()
     {
@@ -38,6 +40,13 @@ public abstract class BaseTrap : MonoBehaviour
     {
         // TODO (if doing one SFX for all traps) traps SFX + monster scream SFX
         
-        // TODO Aggro monster 
+        // Aggro monster
+        GridChaser.Instance?.Aggro(aggressionDuration, false);
+    }
+
+    protected virtual void EndTrapLifecycle()
+    {
+        if (selfDestructs)
+            this.gameObject.SetActive(false);
     }
 }

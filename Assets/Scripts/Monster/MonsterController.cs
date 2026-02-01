@@ -233,10 +233,12 @@ public class GridChaser : MonoBehaviour
         }
     }
 
-    public void Aggro(float? decaySeconds = null)
+    public void Aggro(float? decaySeconds = null, bool hardSetAggro = false)
     {
         float s = decaySeconds ?? aggressionDecaySeconds;
-        aggressionDecaySeconds = Mathf.Max(0.01f, s);
+        s = Mathf.Max(0.01f, s);
+        
+        aggressionDecaySeconds = hardSetAggro ? s : Math.Max(s, aggressionDecaySeconds);
 
         aggressionLevel = 1.0f;
         _aggroTimeRemaining = aggressionDecaySeconds;

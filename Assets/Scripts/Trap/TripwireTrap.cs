@@ -12,6 +12,7 @@ public class TripwireTrap : BaseTrap
         
         // Stunlock VFX / trap animation? Out of scope
         
-        // TODO destroy 
+        // destroy
+        Invoke(nameof(EndTrapLifecycle),  stunDuration);
     }
 }
