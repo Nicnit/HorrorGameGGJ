@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4660434505551211065}
   - component: {fileID: 7738508116956251213}
   - component: {fileID: 7142827464515571267}
+  - component: {fileID: 3211699007388321989}
   m_Layer: 5
   m_Name: Mask
   m_TagString: Untagged
@@ -115,6 +116,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3211699007388321989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266896419324581030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db361e16f06ce414b80ae6a752306158, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MaskManager
+  aggroDurationPuttingMaskOn: 0
+  randomizeAggroDuration: 0
+  minAggroDuration: 0
+  timeWithoutMaskUntilAggro: 0
+  maskPutOnTimer: 1
+  maskTakeOffTimer: 1
+  fogMat: {fileID: 2100000, guid: 790a2029687b34acba416b0793a98e3d, type: 2}
 --- !u!1 &304653845643017243
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,6 +731,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   pauseMenu: {fileID: 3744203231823977816}
   Mask: {fileID: 7142827464515571267}
+  isMaskOn: 0
 --- !u!1 &1363601317245341853
 GameObject:
   m_ObjectHideFlags: 0

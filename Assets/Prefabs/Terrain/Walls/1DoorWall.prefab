@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 7497364037808154533}
   - component: {fileID: 5169877898712231423}
   - component: {fileID: 7581197043354321540}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FM_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -344,7 +344,7 @@ GameObject:
   - component: {fileID: 4800762765956468593}
   - component: {fileID: 6842659192381850888}
   - component: {fileID: 3080215304034419578}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: R_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
