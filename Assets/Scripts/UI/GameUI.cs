@@ -14,7 +14,6 @@ public class GameUI : MonoBehaviour
     {
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            Debug.Log("Escape Pressed");
             TogglePause();
         }
     }
@@ -24,7 +23,6 @@ public class GameUI : MonoBehaviour
 
         Cursor.visible = isPaused;
         if (isPaused) Cursor.lockState = CursorLockMode.None;
-        Debug.Log("Pressed");
 
         pauseMenu.SetActive(isPaused);
         Time.timeScale = isPaused ? 0f : 1f;
@@ -36,8 +34,7 @@ public class GameUI : MonoBehaviour
     }
 
     public void Exit() {
-        Debug.Log("Pressed");
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("Level Generation");
     }
 
     public void MaskOn() {
