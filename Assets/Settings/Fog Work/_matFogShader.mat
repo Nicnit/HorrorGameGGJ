@@ -36,7 +36,7 @@ Material:
     - _BaseDensity: 0
     - _DensityMultiplier: 0.2
     - _DensityThreshold: 0.95
-    - _Intensity: 1
+    - _Intensity: 0
     - _LightScattering: 0.47
     - _MaxDistance: 14
     - _NoiseOffset: 1
