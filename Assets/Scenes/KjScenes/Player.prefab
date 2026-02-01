@@ -168,6 +168,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   shouldBob: 1
+  frequencyMult: 1
+  amplitudeMult: 1
   normalFrequency: 2
   normalAmplitude: 0.15
   horizontalMult: 0.3
@@ -250,6 +252,7 @@ GameObject:
   - component: {fileID: 6498157938661410297}
   - component: {fileID: 5746796296971014943}
   - component: {fileID: 3874662942888267306}
+  - component: {fileID: 6938171717978794301}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -350,3 +353,26 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6938171717978794301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6705697775075807597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceee7f90f4b39304a93f038d45554978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  isActive: 0
+  neck: {fileID: 7164636785525509726}
+  radius: 1
+  numSwoops: 3
+  swoopDuration: 0.6
+  pc: {fileID: 5746796296971014943}
+  monsterPrefab: {fileID: 454744764324180953, guid: 70d47b3ca03a8a44ea3ad770a278904f, type: 3}
+  distanceFromPlayer: 3
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
