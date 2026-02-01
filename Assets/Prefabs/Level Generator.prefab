@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 201236187971676879}
   - component: {fileID: 1130802394187983611}
+  - component: {fileID: 2590576812106161266}
   m_Layer: 0
   m_Name: Level Generator
   m_TagString: Untagged
@@ -46,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   floorPrefab: {fileID: 405572304276984119, guid: 5ff6abce4c1b15b42b75c3ea53393622, type: 3}
   wallPrefab: {fileID: 1476645145883747998, guid: e6d861a3608585447b7eb60d11a792f8, type: 3}
-  ceilingPrefab: {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
+  ceilingPrefab: {fileID: 405572304276984119, guid: 46690f67662bd8e479b0f04c983c2ab7, type: 3}
   grassPrefab: {fileID: 405572304276984119, guid: b175571101ac8bf4e8046d8d00a89928, type: 3}
   randomObjects:
   - {fileID: 3906760495723502457, guid: 0f4a458e45313794aa99f09121cee4b1, type: 3}
@@ -66,12 +67,21 @@ MonoBehaviour:
   worldLightPrefab: {fileID: 8096542298612641285, guid: 4d53a4540024e5047af40158f980bc7c, type: 3}
   wallVariants:
   - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
-  - {fileID: 1476645145883747998, guid: d2bdd1b8f53a29641b4bd1dd5685e114, type: 3}
+  - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
   - {fileID: 1476645145883747998, guid: c19d2f87492fda940af58e6c35415de6, type: 3}
+  - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
+  - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
+  ceilingVariants:
+  - {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
+  - {fileID: 405572304276984119, guid: 86371f8f8e176454aa856a08a8b89a21, type: 3}
+  doorPrefabs:
+  - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
+  - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
+  doorChance: 1
   enemyPrefab: {fileID: 454744764324180953, guid: 70d47b3ca03a8a44ea3ad770a278904f, type: 3}
   minEnemyDistanceTiles: 12
   enemySpawnAttempts: 300
-  enemyY: 0.5
+  enemyY: 1
   tileSize: 5
   mapWidth: 100
   mapHeight: 100
@@ -89,3 +99,17 @@ MonoBehaviour:
   roomPlacementAttempts: 200
   variantWallChance: 0.15
   verboseLogs: 0
+--- !u!114 &2590576812106161266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2280957282962514719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0624da0996cb5e640ba102f22c7eaa2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  gen: {fileID: 0}
+  player: {fileID: 0}
