@@ -11,6 +11,11 @@ public class Controller_LevelGeneration : MonoBehaviour
     [SerializeField] private GameObject ceilingPrefab;
     [SerializeField] private GameObject grassPrefab;
     [SerializeField] private GameObject[] randomObjects;
+    [SerializeField] private GameObject[] trapPrefabs;
+    
+    [SerializeField] private float randomObjectSpawnChance = 0.2f;
+    [SerializeField] private float trapInHallChance = 0.1f;
+    [SerializeField] private float randomObjectTrapChance = 0.25f;
 
     [SerializeField] private GameObject playerPrefab;
 
@@ -27,16 +32,14 @@ public class Controller_LevelGeneration : MonoBehaviour
     [Header("Notes")]
     [SerializeField] private GameObject notePrefab;
     [SerializeField] private float noteY = 0.5f;
-
-    // "9 square block" => radius 1 means 3x3. radius 2 would be 5x5, etc.
+    
     [SerializeField] private int noteCornerSampleRadius = 1;
     
-    // Keeps the anchor point away from the extreme edge so the 3x3 block stays in-bounds.
     [SerializeField] private int noteCornerInset = 2;
     [SerializeField] private int noteAttemptsPerCornerFallback = 250;
-
-    // Min distance from player in tiles 
-    [SerializeField] private int noteMinDistanceTilesFromPlayer = 10;
+    
+    [SerializeField] private int noteMinDistanceTilesFromPlayer = 4;
+    [SerializeField] private int noteGlobalFallbackAttempts = 1000;
 
 
     
@@ -659,18 +662,35 @@ private void BuildWallsFromMap(int y)
             }
             if (!adjacentToHall && randomObjects.Length > 0)
             {
-                // Random chance to place an object in the room cell
-                if (_rng.NextDouble() < 0.3) // 30% chance, adjust as needed
+                if (_rng.NextDouble() < randomObjectSpawnChance) 
                 {
-                    GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
-                    Vector3 worldPos = MapPositionToWorld(p);
-                    GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
-                    obj.transform.parent = _mapParent.transform;
-                    obj.transform.name = $"RoomObject ({p.x},{p.z})";
+                    
+                    // Decide whether to spawn a trap or a regular object
+                    
+                    if (trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
+                    {
+                        GenerateTrapAt(p, p, here);
+                    }
+                    else
+                    {
+                        GameObject objPrefab = randomObjects[_rng.Next(randomObjects.Length)];
+                        Vector3 worldPos = MapPositionToWorld(p);
+                        GameObject obj = Instantiate(objPrefab, worldPos + new Vector3(0f, 0f, 0f), Quaternion.identity);
+                        obj.transform.parent = _mapParent.transform;
+                        obj.transform.name = $"RoomObject ({p.x},{p.z})";
 
-                    // Mark cell as having an object
-                    MapData[x, y, z].Element = MapElement.RoomWithObject;
+                        // Mark cell as having an object
+                        MapData[x, y, z].Element = MapElement.RoomWithObject;
+                    }
                 }
+            }
+        }
+        
+        else if (here == MapElement.Hall)
+        {
+            if (trapPrefabs.Length > 0 && _rng.NextDouble() < trapInHallChance)
+            {
+                GenerateTrapAt(p, p, here);
             }
         }
    
@@ -687,6 +707,30 @@ private void BuildWallsFromMap(int y)
 
     }
 }
+
+    private void GenerateTrapAt(Vector3Int p, Vector3Int position, MapElement element = MapElement.Room)
+    {
+        // Spawn a trap
+        GameObject trapPrefab = trapPrefabs[_rng.Next(trapPrefabs.Length)];
+        Vector3 worldPosTrap = MapPositionToWorld(p);
+        GameObject trapObj = Instantiate(trapPrefab, worldPosTrap + new Vector3(0f, 0f, 0f), Quaternion.identity);
+        trapObj.transform.parent = _mapParent.transform;
+        trapObj.transform.name = $"RoomTrap ({p.x},{p.z})";
+
+
+        MapElement here = MapElement.Empty;
+
+        if (element == MapElement.Room)
+        {
+            here = MapElement.RoomWithObject;
+        }else if (element == MapElement.Hall)
+        {
+            here = MapElement.Hall; // Halls with traps remain halls
+        }
+        
+        // Mark cell as having an object
+        MapData[position.x, position.y, position.z].Element = here;
+    }
 
 private bool IsHall(MapElement e) => e == MapElement.Hall;
 
@@ -883,138 +927,223 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
     
     private GameObject _notesParent;
 
-private enum Corner
-{
-    SW,
-    NW,
-    SE,
-    NE
-}
-
-private void SpawnNotesInCorners(Vector3Int playerCell)
-{
-    if (notePrefab == null)
+    private enum Corner
     {
-        Debug.LogWarning("Note prefab not assigned.");
-        return;
+        SW,
+        NW,
+        SE,
+        NE
     }
 
-    if (_notesParent == null)
-        _notesParent = new GameObject("Notes Container");
-
-    int minDist2 = noteMinDistanceTilesFromPlayer * noteMinDistanceTilesFromPlayer;
-
-    // Prevent duplicates (in case quadrants/corners get weirdly constrained)
-    var usedCells = new HashSet<Vector3Int>();
-
-    // Four corners
-    var corners = new[] { Corner.SW, Corner.NW, Corner.SE, Corner.NE };
-
-    foreach (var corner in corners)
+    private void SpawnNotesInCorners(Vector3Int playerCell)
     {
-        if (TryPickCornerNoteCell(corner, playerCell, minDist2, usedCells, out Vector3Int chosen))
+        if (notePrefab == null)
         {
-            usedCells.Add(chosen);
-
-            Vector3 world = MapPositionToWorld(chosen);
-            GameObject note = Instantiate(notePrefab, new Vector3(world.x, noteY, world.z), Quaternion.identity);
-            note.transform.SetParent(_notesParent.transform);
-            note.transform.rotation = Quaternion.Euler(270f, _rng.Next(0, 360), 0f);
-            note.name = $"Note_{corner}_({chosen.x},{chosen.z})";
+            Debug.LogWarning("Note prefab not assigned.");
+            return;
         }
-        else
+
+        if (_notesParent == null)
+            _notesParent = new GameObject("Notes Container");
+
+        int minDist2 = noteMinDistanceTilesFromPlayer * noteMinDistanceTilesFromPlayer;
+
+        var usedCells = new HashSet<Vector3Int>();
+
+        var corners = new[] { Corner.SW, Corner.NW, Corner.SE, Corner.NE };
+        var failedCorners = new List<Corner>();
+
+        // First pass: try each corner
+        foreach (var corner in corners)
         {
-            Debug.LogWarning($"Could not place note in corner {corner}. Consider lowering noteMinDistanceTilesFromPlayer or increasing fallback attempts.");
+            if (TryPickCornerNoteCell(corner, playerCell, minDist2, usedCells, out Vector3Int chosen))
+            {
+                usedCells.Add(chosen);
+                SpawnNoteAtCell(chosen, corner);
+            }
+            else
+            {
+                failedCorners.Add(corner);
+            }
         }
-    }
-}
 
-private bool TryPickCornerNoteCell(
-    Corner corner,
-    Vector3Int playerCell,
-    int minDist2,
-    HashSet<Vector3Int> used,
-    out Vector3Int chosen)
-{
-    chosen = default;
-
-    // 1) Try the “9-square block” near the corner first (3x3 if radius=1)
-    Vector3Int anchor = GetCornerAnchorCell(corner);
-
-    Vector3Int best = default;
-    int bestScore = int.MinValue;
-    bool found = false;
-
-    for (int dx = -noteCornerSampleRadius; dx <= noteCornerSampleRadius; dx++)
-    for (int dz = -noteCornerSampleRadius; dz <= noteCornerSampleRadius; dz++)
-    {
-        var c = new Vector3Int(anchor.x + dx, 0, anchor.z + dz);
-        if (!InBounds(c)) continue;
-        if (used.Contains(c)) continue;
-        if (!IsWalkableCell(c)) continue;
-
-        int ddx = c.x - playerCell.x;
-        int ddz = c.z - playerCell.z;
-        int dist2 = ddx * ddx + ddz * ddz;
-
-        if (dist2 < minDist2) continue;
-
-        // Score = distance with a tiny jitter so it doesn’t always pick the same cell
-        int score = dist2 + _rng.Next(0, 25);
-
-        if (!found || score > bestScore)
+        // Second pass: any failed corners get a global far-tile spawn
+        foreach (var corner in failedCorners)
         {
-            found = true;
-            bestScore = score;
-            best = c;
+            if (TryPickAnyFarWalkableCell(playerCell, minDist2, usedCells, out Vector3Int chosen))
+            {
+                usedCells.Add(chosen);
+                SpawnNoteAtCell(chosen, corner); // keep the name tag by corner for debugging
+            }
+            else
+            {
+                Debug.LogWarning($"Could not place note for {corner} even with global fallback. Consider lowering noteMinDistanceTilesFromPlayer or increasing noteGlobalFallbackAttempts.");
+            }
         }
     }
 
-    if (found)
+    private void SpawnNoteAtCell(Vector3Int cell, Corner cornerTag)
     {
-        chosen = best;
-        return true;
+        Vector3 world = MapPositionToWorld(cell);
+        GameObject note = Instantiate(notePrefab, new Vector3(world.x, noteY, world.z), Quaternion.identity);
+        note.transform.SetParent(_notesParent.transform);
+        note.transform.rotation = Quaternion.Euler(270f, _rng.Next(0, 360), 0f);
+        note.name = $"Note_{cornerTag}_({cell.x},{cell.z})";
     }
 
-    // 2) Fallback: sample within that QUADRANT, still biased far from player
-    GetQuadrantBounds(corner, out int xMin, out int xMax, out int zMin, out int zMax);
-
-    found = false;
-    bestScore = int.MinValue;
-
-    for (int attempt = 0; attempt < noteAttemptsPerCornerFallback; attempt++)
+    private bool TryPickAnyFarWalkableCell(
+        Vector3Int playerCell,
+        int minDist2,
+        HashSet<Vector3Int> used,
+        out Vector3Int chosen)
     {
-        int x = _rng.Next(xMin, xMax + 1);
-        int z = _rng.Next(zMin, zMax + 1);
-        var c = new Vector3Int(x, 0, z);
+        chosen = default;
 
-        if (!IsWalkableCell(c)) continue;
-        if (used.Contains(c)) continue;
-
-        int ddx = c.x - playerCell.x;
-        int ddz = c.z - playerCell.z;
-        int dist2 = ddx * ddx + ddz * ddz;
-
-        if (dist2 < minDist2) continue;
-
-        int score = dist2 + _rng.Next(0, 100);
-
-        if (!found || score > bestScore)
+        int attempts = Mathf.Max(50, noteGlobalFallbackAttempts);
+        
+        for (int i = 0; i < attempts; i++)
         {
-            found = true;
-            bestScore = score;
-            best = c;
+            int x = _rng.Next(0, mapWidth);
+            int z = _rng.Next(0, mapHeight);
+            var c = new Vector3Int(x, 0, z);
+
+            if (!IsWalkableCell(c)) continue;
+            if (used.Contains(c)) continue;
+
+            int dx = c.x - playerCell.x;
+            int dz = c.z - playerCell.z;
+            int dist2 = dx * dx + dz * dz;
+
+            if (dist2 < minDist2) continue;
+
+            chosen = c;
+            return true;
         }
+        
+        bool found = false;
+        int bestDist2 = -1;
+        Vector3Int bestCell = default;
+
+        void ConsiderList(List<Vector3Int> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                var c = list[i];
+                if (!IsWalkableCell(c)) continue;
+                if (used.Contains(c)) continue;
+
+                int dx = c.x - playerCell.x;
+                int dz = c.z - playerCell.z;
+                int dist2 = dx * dx + dz * dz;
+
+                if (dist2 < minDist2) continue;
+
+                if (!found || dist2 > bestDist2)
+                {
+                    found = true;
+                    bestDist2 = dist2;
+                    bestCell = c;
+                }
+            }
+        }
+
+        ConsiderList(_roomCells);
+        ConsiderList(_hallCells);
+
+        if (found)
+            chosen = bestCell;
+
+        return found;
     }
 
-    if (found)
+
+
+    private bool TryPickCornerNoteCell(
+        Corner corner,
+        Vector3Int playerCell,
+        int minDist2,
+        HashSet<Vector3Int> used,
+        out Vector3Int chosen)
     {
-        chosen = best;
-        return true;
-    }
+        chosen = default;
 
-    return false;
-}
+        // 1) Try the “9-square block” near the corner first (3x3 if radius=1)
+        Vector3Int anchor = GetCornerAnchorCell(corner);
+
+        Vector3Int best = default;
+        int bestScore = int.MinValue;
+        bool found = false;
+
+        for (int dx = -noteCornerSampleRadius; dx <= noteCornerSampleRadius; dx++)
+        for (int dz = -noteCornerSampleRadius; dz <= noteCornerSampleRadius; dz++)
+        {
+            var c = new Vector3Int(anchor.x + dx, 0, anchor.z + dz);
+            if (!InBounds(c)) continue;
+            if (used.Contains(c)) continue;
+            if (!IsWalkableCell(c)) continue;
+
+            int ddx = c.x - playerCell.x;
+            int ddz = c.z - playerCell.z;
+            int dist2 = ddx * ddx + ddz * ddz;
+
+            if (dist2 < minDist2) continue;
+
+            // Score = distance with a tiny jitter so it doesn’t always pick the same cell
+            int score = dist2 + _rng.Next(0, 25);
+
+            if (!found || score > bestScore)
+            {
+                found = true;
+                bestScore = score;
+                best = c;
+            }
+        }
+
+        if (found)
+        {
+            chosen = best;
+            return true;
+        }
+
+        // 2) Fallback: sample within that QUADRANT, still biased far from player
+        GetQuadrantBounds(corner, out int xMin, out int xMax, out int zMin, out int zMax);
+
+        found = false;
+        bestScore = int.MinValue;
+
+        for (int attempt = 0; attempt < noteAttemptsPerCornerFallback; attempt++)
+        {
+            int x = _rng.Next(xMin, xMax + 1);
+            int z = _rng.Next(zMin, zMax + 1);
+            var c = new Vector3Int(x, 0, z);
+
+            if (!IsWalkableCell(c)) continue;
+            if (used.Contains(c)) continue;
+
+            int ddx = c.x - playerCell.x;
+            int ddz = c.z - playerCell.z;
+            int dist2 = ddx * ddx + ddz * ddz;
+
+            if (dist2 < minDist2) continue;
+
+            int score = dist2 + _rng.Next(0, 100);
+
+            if (!found || score > bestScore)
+            {
+                found = true;
+                bestScore = score;
+                best = c;
+            }
+        }
+
+        if (found)
+        {
+            chosen = best;
+            return true;
+        }
+
+        return false;
+    }
 
     private Vector3Int GetCornerAnchorCell(Corner corner)
     {
