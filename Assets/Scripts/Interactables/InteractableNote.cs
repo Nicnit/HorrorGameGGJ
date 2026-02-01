@@ -5,49 +5,21 @@ using Update = Unity.VisualScripting.Update;
 
 public class InteractableNote : BaseInteractable
 {
-    private bool canShowNote = false;
-
-    protected override void Update()
-    {
-        base.Update();
-        
-        // Turn off the Notepaper if it isn't allowed to be seen
-        if (!canShowNote && onInteractVFX.activeInHierarchy)
-        {
-            onInteractVFX.SetActive(false);
-            Debug.Log("Cant show note");
-        }
-    }
-    
+    public string noteText;
      
     protected override void OnInteractionTrigger()
     {
         // update progress manager to include this note as done/read
         FinishInteractable();
-        
-        // Show Note UI
-        canShowNote = !canShowNote;
-        DisplayObject();
-        
-        // Do note sound effect
-        // ReadSFX();
-        
-        Debug.Log("Did interaction trigger");
-        Debug.Log("Can show note: " + canShowNote);
-        Debug.Log(onInteractVFX.activeInHierarchy);
-    }
-    
-    private void ReadSFX()
-    {
-        // Play audio TODO audio manager involvement
-        throw new System.NotImplementedException();
-    }
 
-    protected override void HideUINotice()
-    {
-        Debug.Log("Hiding UI Notice");
-        base.HideUINotice();
-        // Hide Note so doesn't display when too far
-        canShowNote = false;
+        NoteUI note = FindFirstObjectByType<NoteUI>();
+
+        // Show Note UI
+        note.ShowNote(noteText);
+
+        // Do note sound effect
+        AudioManager.Instance.PlaySoundEffect(E_SoundEffect.Note);
+        
+        this.gameObject.SetActive(false);
     }
 }
