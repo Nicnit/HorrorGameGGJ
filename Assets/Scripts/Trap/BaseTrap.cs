@@ -2,6 +2,7 @@ using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public abstract class BaseTrap : MonoBehaviour
 {
@@ -11,6 +12,20 @@ public abstract class BaseTrap : MonoBehaviour
     protected PlayerController playerController;
     [SerializeField] protected MaskManager maskManager;
     [SerializeField] protected bool selfDestructs = true;
+    
+    // Visuals
+    private MeshRenderer[] childRenderers;
+    private bool lastState = true;
+
+    protected virtual void Awake()
+    {
+        if (player == null)
+            player = GameObject.FindGameObjectWithTag("Player");
+        if (maskManager == null)
+            maskManager = GameObject.FindGameObjectWithTag("Mask").GetComponent<MaskManager>();
+        
+        childRenderers = GetComponentsInChildren<MeshRenderer>();
+    }
 
     protected virtual void Start()
     {
@@ -23,9 +38,9 @@ public abstract class BaseTrap : MonoBehaviour
     // If mask set off, hide traps
     protected void Update()
     {
-        trapVFX.enabled = maskManager.IsMaskOn;
+        if (trapVFX.enabled != maskManager.IsMaskOn)
+            SetTrapVisibility(maskManager.IsMaskOn);
     }
-    
 
     protected virtual void OnTriggerEnter(Collider other)
     {
@@ -34,6 +49,23 @@ public abstract class BaseTrap : MonoBehaviour
         {
             DoTrapEffect();
         }
+    }
+
+    protected virtual void SetSizeRandomly(float range)
+    {
+        this.gameObject.transform.localScale += Vector3.one * Random.Range(-range, range);
+    }
+    
+    public void SetTrapVisibility(bool isVisible)
+    {
+        foreach (MeshRenderer renderer in childRenderers)
+        {
+            if (renderer != null)
+                renderer.enabled = isVisible;
+        }
+        
+        // This parent object's visibility
+        trapVFX.enabled = isVisible;
     }
 
     protected virtual void DoTrapEffect()
