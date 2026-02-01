@@ -141,6 +141,7 @@ GameObject:
   - component: {fileID: 7871672489350330240}
   - component: {fileID: 3553737641968716254}
   - component: {fileID: 1320863880471381608}
+  - component: {fileID: 7606108077129871908}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -306,6 +307,31 @@ MonoBehaviour:
   pc: {fileID: 5746796296971014943}
   sprintFrequency: 4
   sprintAmplitude: 0.3
+--- !u!114 &7606108077129871908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767693954449639212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceee7f90f4b39304a93f038d45554978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeathCam
+  isActive: 0
+  neck: {fileID: 7164636785525509726}
+  radius: 1
+  numSwoops: 3
+  swoopDuration: 1
+  monsterPrefab: {fileID: 454744764324180953, guid: 70d47b3ca03a8a44ea3ad770a278904f, type: 3}
+  distanceFromPlayer: 3
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  playerController: {fileID: 5746796296971014943}
+  ml: {fileID: 3553737641968716254}
+  cb: {fileID: 1320863880471381608}
 --- !u!1 &4423664721788431410
 GameObject:
   m_ObjectHideFlags: 0

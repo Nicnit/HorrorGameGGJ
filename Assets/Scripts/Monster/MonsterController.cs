@@ -108,8 +108,9 @@ public class GridChaser : MonoBehaviour
     {
         if (other.gameObject.tag.Equals("Player"))
         {
+            if (GameStateManager.Instance == null) Debug.Log("Game manager is null");
             // Kill the player
-            GameStateManager.Instance.KillPlayer();
+            if (!GameStateManager.Instance.isKillingPlayer()) GameStateManager.Instance.StartCoroutine(GameStateManager.Instance.KillPlayer());
         }
     }
 

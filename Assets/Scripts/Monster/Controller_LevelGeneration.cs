@@ -811,7 +811,7 @@ public class Controller_LevelGeneration : MonoBehaviour
                 {
                     if (_rng.NextDouble() < randomObjectSpawnChance)
                     {
-                        if (trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
+                        if (trapPrefabs != null && trapPrefabs.Length > 0 && _rng.NextDouble() < randomObjectTrapChance)
                         {
                             GenerateTrapAt(p, p, here);
                         }
