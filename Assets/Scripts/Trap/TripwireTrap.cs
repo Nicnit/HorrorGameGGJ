@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TripwireTrap : BaseTrap
 {
-    [SerializeField] protected float stunDuration;
+    [SerializeField] private float stunDuration;
     
     protected override void DoTrapEffect()
     {

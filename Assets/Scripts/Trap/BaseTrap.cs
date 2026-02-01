@@ -8,15 +8,24 @@ public abstract class BaseTrap : MonoBehaviour
     [SerializeField] protected MeshRenderer trapVFX;
     [SerializeField] protected GameObject player;
     protected PlayerController playerController;
-    private MaskManager maskManager;
+    [SerializeField] protected MaskManager maskManager;
+    [SerializeField] protected AudioManager audioManager;
+    [SerializeField] protected AudioClip sfxTrap;
 
     protected virtual void Start()
     {
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player");
         playerController = player.GetComponent<PlayerController>();
-        // maskManager = player.GetComponent<MaskManager>();
     }
+
+    // If mask set on, show traps
+    // If mask set off, hide traps
+    protected void Update()
+    {
+        trapVFX.enabled = maskManager.IsMaskOn;
+    }
+    
 
     protected virtual void OnTriggerEnter(Collider other)
     {
@@ -29,13 +38,6 @@ public abstract class BaseTrap : MonoBehaviour
 
     protected virtual void DoTrapEffect()
     {
-        // Default Behavior here
-    }
-    
-    // If mask set on, show traps
-    // If mask set off, hide traps
-    protected void Update()
-    {
-        // TODO trapVFX.SetActive(maskManager.IsMaskOn);
+        
     }
 }

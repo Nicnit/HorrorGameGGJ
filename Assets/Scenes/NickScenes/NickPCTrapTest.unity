@@ -918,6 +918,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TripwireTrap
   trapVFX: {fileID: 556597512}
   player: {fileID: 1368840289}
+  maskManager: {fileID: 452258177}
   stunDuration: 3
 --- !u!4 &1025185684
 Transform:
