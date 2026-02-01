@@ -139,14 +139,14 @@ MonoBehaviour:
     height: 2
     weight: 0.5
     allowRotate90: 1
-    inset: 0
+    inset: 2
     requireNotAdjacentToHall: 0
   - prefab: {fileID: 405572304276984119, guid: aeb3a16c650650e4b94858c88fecd445, type: 3}
     width: 2
     height: 2
     weight: 0.5
     allowRotate90: 1
-    inset: 0
+    inset: 2
     requireNotAdjacentToHall: 0
   - prefab: {fileID: 405572304276984119, guid: 5ce3953da867f914c9fcdd95cc4c1164, type: 3}
     width: 1
