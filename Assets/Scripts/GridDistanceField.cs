@@ -6,138 +6,167 @@ public class GridDistanceField : MonoBehaviour
     [SerializeField] private Controller_LevelGeneration gen;
     [SerializeField] private Transform player;
 
-    // distances[x,z] = steps to player. -1 = unreachable.
-    private int[,] _dist;
-    private Vector3Int _lastPlayerCell;
-    private bool _hasBuilt;
+    private int[,] _playerDist;
+    private int[,] _targetDist;
 
-    public int[,] Distances => _dist;
+    private Vector3Int _lastPlayerCell;
+    private bool _playerBuilt;
+
+    private Vector3Int _lastTargetCell;
+    private bool _targetBuilt;
+
+    public int[,] PlayerDistances => _playerDist;
+    public int[,] TargetDistances => _targetDist;
 
     private void Awake()
     {
         if (gen == null) gen = FindFirstObjectByType<Controller_LevelGeneration>();
-
-        // DO NOT do .transform on a potentially-null result
-        if (player == null)
-        {
-            var go = GameObject.FindGameObjectWithTag("Player");
-            if (go != null) player = go.transform;
-        }
-
-        // Allocate here so TryGetDistance can't NRE due to Start order.
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
         TryAllocate();
     }
 
     private void Start()
     {
-        // In case gen wasn’t ready in Awake (rare), try again.
         TryAllocate();
-
-        // Don't rebuild until we actually have a player + map
-        if (CanRebuildNow())
-            Rebuild();
+        if (CanRebuildPlayerNow()) RebuildPlayer();
     }
 
     private void Update()
     {
-        // Late-bind player if it spawns after we start
-        if (player == null)
-        {
-            var go = GameObject.FindGameObjectWithTag("Player");
-            if (go != null) player = go.transform;
-            else return;
-        }
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (gen == null) gen = FindFirstObjectByType<Controller_LevelGeneration>();
+        if (gen == null || gen.MapData == null) return;
 
-        // Ensure we have gen + dist
-        if (gen == null)
-        {
-            gen = FindFirstObjectByType<Controller_LevelGeneration>();
-            if (gen == null) return;
-        }
-
-        if (_dist == null)
-        {
-            TryAllocate();
-            if (_dist == null) return;
-        }
-
-        // If your map gets generated in Start(), gen.MapData may be null in early frames
-        if (gen.MapData == null)
-            return;
+        TryAllocate();
+        if (_playerDist == null) return;
 
         var pc = gen.WorldToCell(player.position);
-        if (!_hasBuilt || pc != _lastPlayerCell)
-        {
-            Rebuild();
-        }
+        if (!_playerBuilt || pc != _lastPlayerCell)
+            RebuildPlayer();
     }
 
-    private bool CanRebuildNow()
+    public bool TryGetDistance(Vector3Int cell, out int distance)
     {
-        return gen != null && gen.MapData != null && player != null && _dist != null;
+        return TryGetPlayerDistance(cell, out distance);
     }
 
-    private void TryAllocate()
+    public bool TryGetPlayerDistance(Vector3Int cell, out int distance)
     {
-        if (gen == null) return;
-
-        // If you ever change map size dynamically, reallocate if mismatch.
-        if (_dist == null || _dist.GetLength(0) != gen.MapWidth || _dist.GetLength(1) != gen.MapHeight)
-        {
-            _dist = new int[gen.MapWidth, gen.MapHeight];
-            _hasBuilt = false;
-        }
+        distance = -1;
+        if (!_playerBuilt) return false;
+        if (!gen.InBounds(cell)) return false;
+        distance = _playerDist[cell.x, cell.z];
+        return distance >= 0;
     }
 
-    public void Rebuild()
+    public bool TryGetTargetDistance(Vector3Int cell, out int distance)
     {
-        if (!CanRebuildNow())
-            return;
+        distance = -1;
+        if (!_targetBuilt) return false;
+        if (!gen.InBounds(cell)) return false;
+        distance = _targetDist[cell.x, cell.z];
+        return distance >= 0;
+    }
 
-        _hasBuilt = true;
-        _lastPlayerCell = gen.WorldToCell(player.position);
+    public void BuildFromTargetCell(Vector3Int targetCell)
+    {
+        if (gen == null || gen.MapData == null) return;
 
-        // init to unreachable
-        for (int x = 0; x < gen.MapWidth; x++)
-        for (int z = 0; z < gen.MapHeight; z++)
-            _dist[x, z] = -1;
+        TryAllocate();
+        if (_targetDist == null) return;
 
-        if (!gen.IsWalkableCell(_lastPlayerCell))
-            return;
+        _targetBuilt = true;
+        _lastTargetCell = targetCell;
+
+        FillUnreachable(_targetDist);
+
+        if (!gen.InBounds(targetCell)) return;
+        if (!gen.IsWalkableCell(targetCell)) return;
 
         var q = new Queue<Vector3Int>();
-        _dist[_lastPlayerCell.x, _lastPlayerCell.z] = 0;
-        q.Enqueue(_lastPlayerCell);
+        _targetDist[targetCell.x, targetCell.z] = 0;
+        q.Enqueue(targetCell);
 
         while (q.Count > 0)
         {
             var c = q.Dequeue();
-            int cd = _dist[c.x, c.z];
+            int cd = _targetDist[c.x, c.z];
 
             foreach (var n in gen.GetNeighbors4(c))
             {
                 if (!gen.InBounds(n)) continue;
                 if (!gen.IsWalkableCell(n)) continue;
-                if (_dist[n.x, n.z] != -1) continue;
+                if (_targetDist[n.x, n.z] != -1) continue;
 
-                _dist[n.x, n.z] = cd + 1;
+                _targetDist[n.x, n.z] = cd + 1;
                 q.Enqueue(n);
             }
         }
     }
 
-    public bool TryGetDistance(Vector3Int cell, out int d)
+    public void RebuildPlayer()
     {
-        d = -1;
+        if (!CanRebuildPlayerNow()) return;
 
-        // SUPER IMPORTANT: protect against initialization order
-        if (gen == null || _dist == null)
-            return false;
+        _playerBuilt = true;
+        _lastPlayerCell = gen.WorldToCell(player.position);
 
-        if (!gen.InBounds(cell))
-            return false;
+        FillUnreachable(_playerDist);
 
-        d = _dist[cell.x, cell.z];
-        return d >= 0;
+        if (!gen.InBounds(_lastPlayerCell)) return;
+        if (!gen.IsWalkableCell(_lastPlayerCell)) return;
+
+        var q = new Queue<Vector3Int>();
+        _playerDist[_lastPlayerCell.x, _lastPlayerCell.z] = 0;
+        q.Enqueue(_lastPlayerCell);
+
+        while (q.Count > 0)
+        {
+            var c = q.Dequeue();
+            int cd = _playerDist[c.x, c.z];
+
+            foreach (var n in gen.GetNeighbors4(c))
+            {
+                if (!gen.InBounds(n)) continue;
+                if (!gen.IsWalkableCell(n)) continue;
+                if (_playerDist[n.x, n.z] != -1) continue;
+
+                _playerDist[n.x, n.z] = cd + 1;
+                q.Enqueue(n);
+            }
+        }
+    }
+
+    private bool CanRebuildPlayerNow()
+    {
+        return gen != null && gen.MapData != null && player != null && _playerDist != null;
+    }
+
+    private void TryAllocate()
+    {
+        if (gen == null) return;
+        if (gen.MapWidth <= 0 || gen.MapHeight <= 0) return;
+
+        bool needsAlloc =
+            _playerDist == null ||
+            _playerDist.GetLength(0) != gen.MapWidth ||
+            _playerDist.GetLength(1) != gen.MapHeight;
+
+        if (!needsAlloc) return;
+
+        _playerDist = new int[gen.MapWidth, gen.MapHeight];
+        _targetDist = new int[gen.MapWidth, gen.MapHeight];
+
+        _playerBuilt = false;
+        _targetBuilt = false;
+    }
+
+    private static void FillUnreachable(int[,] dist)
+    {
+        int w = dist.GetLength(0);
+        int h = dist.GetLength(1);
+        for (int x = 0; x < w; x++)
+        for (int z = 0; z < h; z++)
+            dist[x, z] = -1;
     }
 }

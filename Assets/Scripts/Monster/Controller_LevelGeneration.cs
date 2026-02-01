@@ -840,6 +840,37 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
     Debug.Log($"Spawned enemy at cell {chosen} (minDistTiles={minEnemyDistanceTiles})");
 }
 
+    public bool TryGetRandomWalkableCell(
+        out Vector3Int cell,
+        int attempts = 200,
+        Vector3Int? avoid = null,
+        int minManhattanDist = 0)
+    {
+        for (int i = 0; i < attempts; i++)
+        {
+            int x = _rng.Next(0, mapWidth);
+            int z = _rng.Next(0, mapHeight);
+            var c = new Vector3Int(x, 0, z);
+
+            if (!IsWalkableCell(c)) continue;
+
+            if (avoid.HasValue && c == avoid.Value) continue;
+
+            if (minManhattanDist > 0 && avoid.HasValue)
+            {
+                int dx = Mathf.Abs(c.x - avoid.Value.x);
+                int dz = Mathf.Abs(c.z - avoid.Value.z);
+                if (dx + dz < minManhattanDist) continue;
+            }
+
+            cell = c;
+            return true;
+        }
+
+        cell = default;
+        return false;
+    }
+
 
 
 

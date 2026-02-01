@@ -49,10 +49,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   gen: {fileID: 0}
   field: {fileID: 0}
-  moveSpeed: 3
   arriveRadius: 0.2
   repathCooldown: 0.05
   turnSpeed: 10
+  aggressionLevel: 0
+  aggressionDecaySeconds: 15
+  aggroSpeedMax: 5
+  aggroSpeedMin: 3
+  closeChaseSpeed: 3
+  closeChaseTiles: 3
+  wanderSpeed: 4
+  wanderPickCooldown: 20
+  wanderPickAttempts: 200
+  wanderMinManhattanDist: 6
+  wanderGoalArriveTiles: 0
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 1
+  probeRadius: 0.35
+  probeHeight: 0.5
+  probeDistance: 3.5
+  wanderProbeDistanceBoost: 4
+  blockDistance: 1
+  arcDegrees: 270
+  arcStepDegrees: 15
+  allowReverseWhenStuck: 1
+  reverseConeDegrees: 180
+  intentWeight: 1
+  clearanceWeight: 0.75
+  reversePenalty: 0.65
+  wanderJitterDegrees: 6
+  stuckSeconds: 1.25
+  stuckMoveEpsilon: 0.08
+  noProgressSeconds: 2
+  minProgressEpsilon: 0.25
+  playerHidden: 0
+  player: {fileID: 0}
+  losEyeHeight: 0.7
+  losPlayerHeight: 0.7
+  losMaxDistance: 999
+  losChaseSpeed: 5
+  drawDebugGizmos: 1
+  gizmoGoalSphereRadius: 0.35
+  gizmoLineHeight: 0.15
+  gizmoDirLength: 2
+  _mode: 1
 --- !u!143 &4862643798253313824
 CharacterController:
   m_ObjectHideFlags: 0
