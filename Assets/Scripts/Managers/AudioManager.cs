@@ -100,13 +100,14 @@ public class AudioManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
+        Debug.Log(scene.name);
         switch (scene.name)
         {
             case "MainMenu":
                 Instance.ChangeBackground(E_BackGroundMusic.MainMenu);
                 StopCoroutine(PlaySoundRandomly());
                 break;
-            case "GameTest":
+            case "Level Generation":
                 Instance.ChangeBackground(E_BackGroundMusic.Game);
                 StartCoroutine(PlaySoundRandomly());
                 break;
