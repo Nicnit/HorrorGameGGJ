@@ -7,12 +7,12 @@ public abstract class BaseInteractable : MonoBehaviour
     private bool isFinished = false;
     protected void FinishInteractable() => isFinished = true;
     public bool IsFinished() => isFinished;
-    [SerializeField] protected GameObject noticePopup;
     [SerializeField] protected float interactDistance;
-    [SerializeField] protected GameObject onInteractVFX;
- 
+
     protected GameObject player;
     protected InputAction isInteracting;
+    public string InteractableText;
+    public bool isInteractable = true;
 
     protected void Awake()
     {
@@ -24,41 +24,41 @@ public abstract class BaseInteractable : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
     }
-    
-    /// <summary>
-    /// Manage the UI popup and player input
-    /// </summary>
+
     protected virtual void Update()
     {
-        // If player close enough, popup notice ui
-        float playerDistance = Vector3.Distance(transform.position, player.transform.position);
-        if (playerDistance < interactDistance)
-            ShowUINotice();
-        else
-            HideUINotice();
-        
-        // If UI showing and player uses Interact button, do interaction
-        // Also if no other UI is showing
-        if (isInteracting != null && isInteracting.triggered
-                && noticePopup.activeSelf) // TODO check if MAIN UI is activated via UI manager
+        if (isInteracting != null && isInteracting.triggered && isInteractable && playerInRange)
         {
             OnInteractionTrigger();
         }
     }
-    
-    protected virtual void ShowUINotice()
+
+    // --- Trigger-based detection ---
+    private bool playerInRange = false;
+
+    private void OnTriggerEnter(Collider other)
     {
-        noticePopup.SetActive(true);
-    }
-    
-    protected virtual void HideUINotice()
-    {
-        noticePopup.SetActive(false);
+        if (other.CompareTag("Player") && isInteractable)
+        {
+            playerInRange = true;
+            ToggleUINotice(true);
+        }
     }
 
-    protected virtual void DisplayObject()
+    private void OnTriggerExit(Collider other)
     {
-        onInteractVFX.SetActive(true);
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+            ToggleUINotice(false);
+        }
+    }
+
+    protected virtual void ToggleUINotice(bool show) {
+        Debug.Log("Trying to show");
+        Debug.Log(show);
+        NoticeUI notice = FindFirstObjectByType<NoticeUI>();
+        notice.ToggleNotice(show, InteractableText);
     }
 
     /// <summary>

@@ -24,6 +24,7 @@ public enum E_SoundEffect
     AmbientNoise2,
     DoorOpen,
     PlayerFootstep,
+    Note,
 }
 
 public class AudioManager : MonoBehaviour
@@ -45,6 +46,7 @@ public class AudioManager : MonoBehaviour
     public AudioSource AmbientNoise2;
     public AudioSource DoorOpen;
     public AudioSource PlayerFootstep;
+    public AudioSource Note;
 
 
     [Header("Background Reference")]
@@ -137,6 +139,12 @@ public class AudioManager : MonoBehaviour
             case E_SoundEffect.ButtonPressed:
                 ButtonPressed.Play();
                 break;
+            case E_SoundEffect.Note:
+                Note.Play();
+                break;
+            case E_SoundEffect.DoorOpen:
+                DoorOpen.Play();
+                break;
         }
     }
     public void PlaySoundEffect(string soundEffect)
@@ -146,6 +154,12 @@ public class AudioManager : MonoBehaviour
         {
             case E_SoundEffect.ButtonPressed:
                 ButtonPressed.Play();
+                break;
+            case E_SoundEffect.Note:
+                Note.Play();
+                break;
+            case E_SoundEffect.DoorOpen:
+                DoorOpen.Play();
                 break;
         }
     }
@@ -157,6 +171,12 @@ public class AudioManager : MonoBehaviour
         {
             case E_SoundEffect.ButtonPressed:
                 ButtonPressed.Stop();
+                break;
+            case E_SoundEffect.Note:
+                Note.Stop();
+                break;
+            case E_SoundEffect.DoorOpen:
+                DoorOpen.Stop();
                 break;
         }
     }
