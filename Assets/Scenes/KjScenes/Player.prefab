@@ -154,6 +154,8 @@ MonoBehaviour:
   minPitch: -90
   maxPitch: 90
   sensitivity: 0.085
+  smoothSpeed: 0.8
+  smooth: 1
   playerBody: {fileID: 5023166463494329508}
 --- !u!114 &1320863880471381608
 MonoBehaviour:
@@ -168,6 +170,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   shouldBob: 1
+  frequencyMult: 1
+  amplitudeMult: 1
   normalFrequency: 2
   normalAmplitude: 0.15
   horizontalMult: 0.3
@@ -325,8 +329,38 @@ MonoBehaviour:
   maxStamina: 5
   degenRate: 3
   regenRate: 0.5
+  trapEffectiveness: 0.5
   wallNormalYThreshold: 0.2
   wallDepenetrationBias: 0
+  CurrentNote: 0
+  NoteList:
+  - "This is a note to anyone who may find this. I\uFFFDm trapped. I don\uFFFDt know
+    how, why, or where I am. For that matter, I must have been taken in my sleep.
+    Why, I don\uFFFDt know; sorry, not important. I tend to ramble. I\uFFFDll be
+    slipping this out via the sewer. If you can trace this back to me, I will be
+    most...."
+  - "[Note is torned] ...Twisting, turning, reeling. Bones break, blood curdles,
+    flesh ripped. They\uFFFDre all around me. How did I get here? Who is here? What
+    is here? Can I hear? Can I see? Nothing. Nothing but the masks. The masks help
+    me see.\r\n\r\nDays and days they try to break me. ME? HA! I\uFFFDm better than
+    that, right? They stop, but I see. I see it\uFFFDthe fellow who stalks the hallways
+    here at North Folk. He oozes but leaves no trails. My friend, a pound of immovable
+    flesh that keeps getting closer, setting up his tricks and traps. He is a clever
+    one.\r\n\r\nBUT, BUT, BUT... I know his clever little secret. These eyes don\uFFFDt
+    work, so get new eyes. A new face by becoming unrecognizable. You recognize it?
+    He comes closer now. I\uFFFDm ready for him. Are you?"
+  - 'With you and with me, E [the name is burned out] w  June 11th 2005 '
+  - 'Yo what up ima do poetry that pretty obous think that bit in bendy with the
+    weird alter thing in chapter 1   Gather unto thee the following artifacts of
+    your gaze To escape the confines of this maze    -Childs doll -A knife -A pair
+    of dice -A bar of gold -The ink of an esteemed man  '
+  - "Northfolk medical center\r\n\r\nName of patient: gordon ramsey \r\n\r\nDate
+    of admission June 11th 2005 \r\n\r\nAdmit Order signed by the honerable judge
+    nick bolton\r\n\r\nLocation of last admittance: First Admitance \r\n\r\nDOB 12/20/1994\r\n\r\nDangerous
+    to self: yes\r\n\r\nDangrous to others: yes \r\n\r\nReason for admittance: On
+    the 6t of march 2005 patchent entered the big yak club in las vagas and shocker
+    he blew all his money long story short wife tried to leave him so he killed em
+    witha knife \r\n\r\nPatchent has so far forsfully rejected all attempts at medication\r\n"
 --- !u!136 &3874662942888267306
 CapsuleCollider:
   m_ObjectHideFlags: 0
