@@ -168,8 +168,8 @@ MonoBehaviour:
     serializedVersion: 0
     m_Bits: 1
   m_ScaleMode: 0
-  m_Offset: {x: -0.14653847, y: 0, z: 1.2474797}
-  m_Size: {x: 2.54, y: 2, z: 2.74}
+  m_Offset: {x: -0.14653847, y: 0, z: 0.29593495}
+  m_Size: {x: 2.54, y: 2, z: 0.65}
   m_FadeFactor: 1
   version: 1
   m_DecalLayerMask: 1
