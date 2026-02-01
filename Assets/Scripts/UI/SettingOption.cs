@@ -23,7 +23,6 @@ public class SettingOption : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
-        Debug.Log("test");
         AudioManager.Instance.masterVolume = volume;
         AudioControl.SetFloat("Master", volume);
         if (MasterSlider.value == -30)

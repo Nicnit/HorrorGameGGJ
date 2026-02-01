@@ -17,6 +17,9 @@ public class GameStateManager : MonoBehaviour
     private GameObject monsterSlashEffect; 
     Animator slashAnimator;
 
+    public int completeNotes = 0;
+    [SerializeField] private int NumNotesToFind = 3;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)

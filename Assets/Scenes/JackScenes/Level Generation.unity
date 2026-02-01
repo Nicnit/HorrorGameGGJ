@@ -119,6 +119,181 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &250852989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 2280957282962514719, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+  m_PrefabInstance: {fileID: 3179271339032914121}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 250852992}
+  - component: {fileID: 250852991}
+  - component: {fileID: 250852990}
+  m_Layer: 0
+  m_Name: Level Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &250852990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 2590576812106161266, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+  m_PrefabInstance: {fileID: 3179271339032914121}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250852989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0624da0996cb5e640ba102f22c7eaa2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  gen: {fileID: 0}
+  player: {fileID: 0}
+--- !u!114 &250852991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+  m_PrefabInstance: {fileID: 3179271339032914121}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250852989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83a330620e193eb43894c034e7f23eae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  floorPrefab: {fileID: 405572304276984119, guid: 5ff6abce4c1b15b42b75c3ea53393622, type: 3}
+  wallPrefab: {fileID: 1476645145883747998, guid: e6d861a3608585447b7eb60d11a792f8, type: 3}
+  ceilingPrefab: {fileID: 405572304276984119, guid: 46690f67662bd8e479b0f04c983c2ab7, type: 3}
+  grassPrefab: {fileID: 405572304276984119, guid: b175571101ac8bf4e8046d8d00a89928, type: 3}
+  randomObjects:
+  - {fileID: 3906760495723502457, guid: 0f4a458e45313794aa99f09121cee4b1, type: 3}
+  - {fileID: 2217418658563060140, guid: 4d4196690c16c94408317cb50242bccc, type: 3}
+  - {fileID: 3922625737644377471, guid: b817b8e1845299348a8f7eb5f5b72df5, type: 3}
+  - {fileID: 3581432555439892394, guid: 412258ce98d4ca842aa8d65316daa0d2, type: 3}
+  - {fileID: 4359725714381832638, guid: e3c5befc41d906942925a3258d425d0a, type: 3}
+  - {fileID: 6637633822102931258, guid: 571f85b01718c6e409a4e4f62d3aee34, type: 3}
+  - {fileID: 2591438181464089777, guid: 95d93c5a30e83784ba35919c06bcee37, type: 3}
+  - {fileID: 3419578897147790468, guid: 5d55ac5abc07f874fad4b0d92e91eebd, type: 3}
+  - {fileID: 4957642085320362517, guid: 55e6564e34daf514aa9d96ba64098cd9, type: 3}
+  - {fileID: 5146296316724709025, guid: b4e2f15d5f90e554ebe4b62651ce165d, type: 3}
+  - {fileID: 2017405188502108377, guid: 369bbd0d527ca1a45935eb887f68549d, type: 3}
+  - {fileID: 8081646803540556620, guid: 28a11465e63187b4aa59d293067fd745, type: 3}
+  trapPrefabs:
+  - {fileID: 2605676774829917753, guid: c69acafee7cc14fb8b7e936434ca7299, type: 3}
+  randomObjectSpawnChance: 0.4
+  trapInHallChance: 0.6
+  randomObjectTrapChance: 0.3
+  playerPrefab: {fileID: 6705697775075807597, guid: 7d1c00746275844458465bd6cdadb08a, type: 3}
+  worldLightPrefab: {fileID: 8096542298612641285, guid: 4d53a4540024e5047af40158f980bc7c, type: 3}
+  wallVariants:
+  - {fileID: 1476645145883747998, guid: f5ae9b05e50f230439f21bf37073fe55, type: 3}
+  - {fileID: 1476645145883747998, guid: 3f7c645ec870a684cbe3a2ea70c78a59, type: 3}
+  - {fileID: 1476645145883747998, guid: 37c0d512386b39f4e82bd13a853b8fa5, type: 3}
+  - {fileID: 1476645145883747998, guid: 37c0d512386b39f4e82bd13a853b8fa5, type: 3}
+  - {fileID: 1476645145883747998, guid: 7b19b3b71a738384f91238eb3841e849, type: 3}
+  - {fileID: 1476645145883747998, guid: 89d59f638c253324489dda95fe3e5d55, type: 3}
+  - {fileID: 1476645145883747998, guid: 71aac466c8b417740a260eef7452686e, type: 3}
+  ceilingVariants:
+  - {fileID: 405572304276984119, guid: 65bdbc454dce3ea42bdf7505c023af39, type: 3}
+  - {fileID: 405572304276984119, guid: 86371f8f8e176454aa856a08a8b89a21, type: 3}
+  floorVariants:
+  - {fileID: 405572304276984119, guid: 8b11cabf52d991543a108b240728b2f6, type: 3}
+  - {fileID: 405572304276984119, guid: 56ac96cad35d1fa449dce97c8dc31446, type: 3}
+  - {fileID: 405572304276984119, guid: c0223a91d58f25d4f86648352e300b46, type: 3}
+  - {fileID: 405572304276984119, guid: 88d2978e2bc494f4ba6f578f0ed25599, type: 3}
+  - {fileID: 405572304276984119, guid: c673ae6e89c9e624ab5792de6274f3af, type: 3}
+  tripwireTrapPrefab: {fileID: 5755853476216424618, guid: 88d62f63138184f2d884f45149627d16, type: 3}
+  tripwireReplaceChance: 0.25
+  tripwireY: 0.05
+  doorPrefabs:
+  - {fileID: 1476645145883747998, guid: 39a511573b60e374e9e1b44caf6bad15, type: 3}
+  - {fileID: 1476645145883747998, guid: a0f85b94ea647d74e995481fe1a730cb, type: 3}
+  doorChance: 1
+  notePrefab: {fileID: 8432962807303128876, guid: 815b0a822bd60674e9268aa11ca6b56c, type: 3}
+  noteY: 0.1
+  noteCornerSampleRadius: 1
+  noteCornerInset: 2
+  noteAttemptsPerCornerFallback: 250
+  noteMinDistanceTilesFromPlayer: 3
+  noteGlobalFallbackAttempts: 1000
+  enemyPrefab: {fileID: 454744764324180953, guid: 70d47b3ca03a8a44ea3ad770a278904f, type: 3}
+  minEnemyDistanceTiles: 12
+  enemySpawnAttempts: 300
+  enemyY: 1
+  tileSize: 5
+  mapWidth: 100
+  mapHeight: 100
+  mapDepth: 3
+  wallVerticalOffset: 1.5
+  directionalStickiness: 0.6
+  paintBudget: 300
+  jumpChancePerStep: 0.04
+  maxJumps: 200
+  minRooms: 6
+  maxRooms: 12
+  roomAttemptChancePerPaintStep: 0.03
+  roomWidthRange: {x: 3, y: 7}
+  roomHeightRange: {x: 3, y: 7}
+  roomPlacementAttempts: 200
+  variantWallChance: 0.15
+  variantFloorChance: 0.2
+  stagedFloorPieces:
+  - prefab: {fileID: 405572304276984119, guid: a809e85aff26db843a8d5c5421250df4, type: 3}
+    width: 1
+    height: 1
+    weight: 0.5
+    allowRotate90: 1
+    inset: 0
+    requireNotAdjacentToHall: 1
+  - prefab: {fileID: 405572304276984119, guid: f09c5265416cbc24694e919b5a0e2357, type: 3}
+    width: 1
+    height: 1
+    weight: 0.5
+    allowRotate90: 1
+    inset: 0
+    requireNotAdjacentToHall: 1
+  - prefab: {fileID: 405572304276984119, guid: a23b9d9986d79a44cb0dace6fc15ee3e, type: 3}
+    width: 2
+    height: 2
+    weight: 0.5
+    allowRotate90: 1
+    inset: 2
+    requireNotAdjacentToHall: 0
+  - prefab: {fileID: 405572304276984119, guid: aeb3a16c650650e4b94858c88fecd445, type: 3}
+    width: 2
+    height: 2
+    weight: 0.5
+    allowRotate90: 1
+    inset: 2
+    requireNotAdjacentToHall: 0
+  - prefab: {fileID: 405572304276984119, guid: 5ce3953da867f914c9fcdd95cc4c1164, type: 3}
+    width: 1
+    height: 1
+    weight: 0.7
+    allowRotate90: 1
+    inset: 0
+    requireNotAdjacentToHall: 0
+  stagedPiecesTarget: 3
+  stagedPlacementAttempts: 600
+  stagedPlacementChance: 0.3
+  verboseLogs: 0
+--- !u!4 &250852992
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 201236187971676879, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+  m_PrefabInstance: {fileID: 3179271339032914121}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250852989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 38.23204, y: -14.72762, z: 14.8094}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1478674119
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -223,6 +398,14 @@ PrefabInstance:
     - target: {fileID: 201236187971676879, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+      propertyPath: trapInHallChance
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
+      propertyPath: trapPrefabs.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1130802394187983611, guid: 2cdcbaa12e0296c4abf28d33246561b6, type: 3}
       propertyPath: 'randomObjects.Array.data[13]'
