@@ -23,6 +23,21 @@ public class Controller_LevelGeneration : MonoBehaviour
     [Header("Doors")]
     [SerializeField] private GameObject[] doorPrefabs;
     [SerializeField] private float doorChance = 1.0f;
+    
+    [Header("Notes")]
+    [SerializeField] private GameObject notePrefab;
+    [SerializeField] private float noteY = 0.5f;
+
+    // "9 square block" => radius 1 means 3x3. radius 2 would be 5x5, etc.
+    [SerializeField] private int noteCornerSampleRadius = 1;
+    
+    // Keeps the anchor point away from the extreme edge so the 3x3 block stays in-bounds.
+    [SerializeField] private int noteCornerInset = 2;
+    [SerializeField] private int noteAttemptsPerCornerFallback = 250;
+
+    // Min distance from player in tiles 
+    [SerializeField] private int noteMinDistanceTilesFromPlayer = 10;
+
 
     
     [Header("Enemy Spawning")]
@@ -134,7 +149,7 @@ public class Controller_LevelGeneration : MonoBehaviour
         Instantiate(playerPrefab, new Vector3(worldPosCenter.x, .5f, worldPosCenter.z), Quaternion.identity);
         Instantiate(worldLightPrefab, new Vector3(worldPosCenter.x, worldPosCenter.y+wallVerticalOffset+.5f, worldPosCenter.z), Quaternion.identity);
         SpawnEnemyFarFrom(center);
-
+        SpawnNotesInCorners(center);
         
     }
 
@@ -466,7 +481,7 @@ public class Controller_LevelGeneration : MonoBehaviour
             // Build a rectangle that starts at the door and extends outward in direction d
             // Randomize lateral offset so the door isn't always centered
             int lateral = (d == Direction.North || d == Direction.South) ? w : h;
-            int lateralOffset = _rng.Next(0, lateral); // 0..(lateral-1)
+            int lateralOffset = _rng.Next(0, lateral); 
 
             int x0, x1, z0, z1;
 
@@ -865,44 +880,235 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
         yield return c + new Vector3Int(-1, 0, 0);
     }
     
-    private void SpawnEnemyFarFrom(Vector3Int playerCell)
+    
+    private GameObject _notesParent;
+
+private enum Corner
 {
-    if (enemyPrefab == null)
+    SW,
+    NW,
+    SE,
+    NE
+}
+
+private void SpawnNotesInCorners(Vector3Int playerCell)
+{
+    if (notePrefab == null)
     {
-        Debug.LogWarning("Enemy prefab not assigned.");
+        Debug.LogWarning("Note prefab not assigned.");
         return;
     }
 
-    int minDist2 = minEnemyDistanceTiles * minEnemyDistanceTiles;
+    if (_notesParent == null)
+        _notesParent = new GameObject("Notes Container");
 
-    bool found = false;
-    Vector3Int chosen = default;
+    int minDist2 = noteMinDistanceTilesFromPlayer * noteMinDistanceTilesFromPlayer;
 
-    // Try random sampling first (fast)
-    for (int i = 0; i < enemySpawnAttempts; i++)
+    // Prevent duplicates (in case quadrants/corners get weirdly constrained)
+    var usedCells = new HashSet<Vector3Int>();
+
+    // Four corners
+    var corners = new[] { Corner.SW, Corner.NW, Corner.SE, Corner.NE };
+
+    foreach (var corner in corners)
     {
-        // Bias toward rooms, but allow halls too
-        bool pickRoom = _roomCells.Count > 0 && _rng.NextDouble() < 0.7;
-        var list = pickRoom ? _roomCells : _hallCells;
-        if (list.Count == 0) continue;
+        if (TryPickCornerNoteCell(corner, playerCell, minDist2, usedCells, out Vector3Int chosen))
+        {
+            usedCells.Add(chosen);
 
-        Vector3Int cell = list[_rng.Next(list.Count)];
+            Vector3 world = MapPositionToWorld(chosen);
+            GameObject note = Instantiate(notePrefab, new Vector3(world.x, noteY, world.z), Quaternion.identity);
+            note.transform.SetParent(_notesParent.transform);
+            note.transform.rotation = Quaternion.Euler(270f, _rng.Next(0, 360), 0f);
+            note.name = $"Note_{corner}_({chosen.x},{chosen.z})";
+        }
+        else
+        {
+            Debug.LogWarning($"Could not place note in corner {corner}. Consider lowering noteMinDistanceTilesFromPlayer or increasing fallback attempts.");
+        }
+    }
+}
 
-        // Must be currently walkable (excludes RoomWithObject)
-        if (!IsWalkableCell(cell)) continue;
+private bool TryPickCornerNoteCell(
+    Corner corner,
+    Vector3Int playerCell,
+    int minDist2,
+    HashSet<Vector3Int> used,
+    out Vector3Int chosen)
+{
+    chosen = default;
 
-        int dx = cell.x - playerCell.x;
-        int dz = cell.z - playerCell.z;
-        int dist2 = dx * dx + dz * dz;
+    // 1) Try the “9-square block” near the corner first (3x3 if radius=1)
+    Vector3Int anchor = GetCornerAnchorCell(corner);
+
+    Vector3Int best = default;
+    int bestScore = int.MinValue;
+    bool found = false;
+
+    for (int dx = -noteCornerSampleRadius; dx <= noteCornerSampleRadius; dx++)
+    for (int dz = -noteCornerSampleRadius; dz <= noteCornerSampleRadius; dz++)
+    {
+        var c = new Vector3Int(anchor.x + dx, 0, anchor.z + dz);
+        if (!InBounds(c)) continue;
+        if (used.Contains(c)) continue;
+        if (!IsWalkableCell(c)) continue;
+
+        int ddx = c.x - playerCell.x;
+        int ddz = c.z - playerCell.z;
+        int dist2 = ddx * ddx + ddz * ddz;
 
         if (dist2 < minDist2) continue;
 
-        chosen = cell;
-        found = true;
-        break;
+        // Score = distance with a tiny jitter so it doesn’t always pick the same cell
+        int score = dist2 + _rng.Next(0, 25);
+
+        if (!found || score > bestScore)
+        {
+            found = true;
+            bestScore = score;
+            best = c;
+        }
     }
 
-    // Fallback: pick the farthest walkable cell
+    if (found)
+    {
+        chosen = best;
+        return true;
+    }
+
+    // 2) Fallback: sample within that QUADRANT, still biased far from player
+    GetQuadrantBounds(corner, out int xMin, out int xMax, out int zMin, out int zMax);
+
+    found = false;
+    bestScore = int.MinValue;
+
+    for (int attempt = 0; attempt < noteAttemptsPerCornerFallback; attempt++)
+    {
+        int x = _rng.Next(xMin, xMax + 1);
+        int z = _rng.Next(zMin, zMax + 1);
+        var c = new Vector3Int(x, 0, z);
+
+        if (!IsWalkableCell(c)) continue;
+        if (used.Contains(c)) continue;
+
+        int ddx = c.x - playerCell.x;
+        int ddz = c.z - playerCell.z;
+        int dist2 = ddx * ddx + ddz * ddz;
+
+        if (dist2 < minDist2) continue;
+
+        int score = dist2 + _rng.Next(0, 100);
+
+        if (!found || score > bestScore)
+        {
+            found = true;
+            bestScore = score;
+            best = c;
+        }
+    }
+
+    if (found)
+    {
+        chosen = best;
+        return true;
+    }
+
+    return false;
+}
+
+    private Vector3Int GetCornerAnchorCell(Corner corner)
+    {
+        int x0 = noteCornerInset;
+        int x1 = mapWidth - 1 - noteCornerInset;
+        int z0 = noteCornerInset;
+        int z1 = mapHeight - 1 - noteCornerInset;
+
+        // Clamp in case inset is too aggressive
+        x0 = Mathf.Clamp(x0, 0, mapWidth - 1);
+        x1 = Mathf.Clamp(x1, 0, mapWidth - 1);
+        z0 = Mathf.Clamp(z0, 0, mapHeight - 1);
+        z1 = Mathf.Clamp(z1, 0, mapHeight - 1);
+
+        return corner switch
+        {
+            Corner.SW => new Vector3Int(x0, 0, z0),
+            Corner.NW => new Vector3Int(x0, 0, z1),
+            Corner.SE => new Vector3Int(x1, 0, z0),
+            Corner.NE => new Vector3Int(x1, 0, z1),
+            _ => new Vector3Int(x0, 0, z0),
+        };
+    }
+
+    private void GetQuadrantBounds(Corner corner, out int xMin, out int xMax, out int zMin, out int zMax)
+    {
+        // Split the map in half for quadrants
+        int midX = mapWidth / 2;
+        int midZ = mapHeight / 2;
+
+        // Ensure bounds are valid inclusive ranges
+        switch (corner)
+        {
+            case Corner.SW:
+                xMin = 0; xMax = Mathf.Max(0, midX - 1);
+                zMin = 0; zMax = Mathf.Max(0, midZ - 1);
+                break;
+
+            case Corner.NW:
+                xMin = 0; xMax = Mathf.Max(0, midX - 1);
+                zMin = midZ; zMax = mapHeight - 1;
+                break;
+
+            case Corner.SE:
+                xMin = midX; xMax = mapWidth - 1;
+                zMin = 0; zMax = Mathf.Max(0, midZ - 1);
+                break;
+
+            case Corner.NE:
+            default:
+                xMin = midX; xMax = mapWidth - 1;
+                zMin = midZ; zMax = mapHeight - 1;
+                break;
+        }
+    }
+
+
+    private void SpawnEnemyFarFrom(Vector3Int playerCell)
+    {
+        if (enemyPrefab == null)
+        {
+            Debug.LogWarning("Enemy prefab not assigned.");
+            return;
+        }
+
+        int minDist2 = minEnemyDistanceTiles * minEnemyDistanceTiles;
+
+        bool found = false;
+        Vector3Int chosen = default;
+
+        // Try random sampling first (fast)
+        for (int i = 0; i < enemySpawnAttempts; i++)
+        {
+            // Bias toward rooms, but allow halls too
+            bool pickRoom = _roomCells.Count > 0 && _rng.NextDouble() < 0.7;
+            var list = pickRoom ? _roomCells : _hallCells;
+            if (list.Count == 0) continue;
+
+            Vector3Int cell = list[_rng.Next(list.Count)];
+
+            // Must be currently walkable (excludes RoomWithObject)
+            if (!IsWalkableCell(cell)) continue;
+
+            int dx = cell.x - playerCell.x;
+            int dz = cell.z - playerCell.z;
+            int dist2 = dx * dx + dz * dz;
+
+            if (dist2 < minDist2) continue;
+
+            chosen = cell;
+            found = true;
+            break;
+    }
+        
     if (!found)
     {
         int bestDist2 = -1;
@@ -941,7 +1147,7 @@ private void SpawnWallForEdge(Vector3Int floorCell, Direction edgeDir)
     Vector3 world = MapPositionToWorld(chosen);
     Instantiate(enemyPrefab, new Vector3(world.x, enemyY, world.z), Quaternion.identity);
     Debug.Log($"Spawned enemy at cell {chosen} (minDistTiles={minEnemyDistanceTiles})");
-}
+    }
 
     public bool TryGetRandomWalkableCell(
         out Vector3Int cell,
